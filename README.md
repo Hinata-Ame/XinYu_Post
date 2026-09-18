@@ -19,7 +19,7 @@ rest
     align-items: center;
     padding: 40px 16px 80px;
     overflow-x: hidden;
-    background: url('assets/inn-bg.jpg') center/cover no-repeat fixed, #2a1c12;
+    background: url('./assets/inn-bg.jpg') center/cover no-repeat fixed, #2a1c12;
   }
   body::before {
     content: "";
@@ -241,10 +241,10 @@ rest
       <div class="lamp"></div>
       <div class="characters">
         <div class="char knight" onclick="talk('knight')">
-          <img src="assets/knight.png" alt="小骑士">
+          <img src="./assets/knight.png" alt="小骑士">
         </div>
         <div class="char hornet" onclick="talk('hornet')">
-          <img src="assets/hornet.png" alt="黄蜂女">
+          <img src="./assets/hornet.png" alt="黄蜂女">
         </div>
       </div>
       <div class="bubble" id="bubble">轻触他们，听听他们会说什么 ✦</div>
@@ -259,7 +259,7 @@ rest
     </div>
   </div>
 
-  <audio id="bgm" src="assets/bgm.mp3" loop></audio>
+  <audio id="bgm" src="./assets/bgm.mp3" loop></audio>
 
 <script>
   const SUPABASE_URL = "jnwxccfzaoxjxwcemgjq";
