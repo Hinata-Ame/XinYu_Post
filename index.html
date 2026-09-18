@@ -292,6 +292,7 @@
   const bgm = document.getElementById('bgm');
   const btn = document.getElementById('musicBtn');
   let playing = false;
+
   function toggleMusic() {
     if (playing) {
       bgm.pause();
@@ -312,3 +313,67 @@
     const hours = Math.floor((totalMin % 1440) / 60);
     const mins = totalMin % 60;
     let parts = [];
+    if (days > 0) parts.push(days + "天");
+    if (hours > 0) parts.push(hours + "小时");
+    if (mins > 0) parts.push(mins + "分钟");
+    if (parts.length === 0) parts.push("刚刚");
+    return parts.join("");
+  }
+
+  async function recordEnter() {
+    try {
+      await db.from("visits").insert({
+        visitor: VISITOR,
+        entered_at: new Date().toISOString()
+      });
+    } catch (e) {}
+  }
+
+  async function recordLeave() {
+    try {
+      const { data } = await db.from("visits").select("*").eq("visitor", VISITOR).is("left_at", null).order("entered_at", { ascending: false }).limit(1);
+      if (data && data[0]) {
+        await db.from("visits").update({ left_at: new Date().toISOString() }).eq("id", data[0].id);
+      }
+    } catch (e) {}
+  }
+
+  async function showLastGap() {
+    try {
+      const { data } = await db.from("visits").select("*").eq("visitor", VISITOR).not("left_at", "is", null).order("left_at", { ascending: false }).limit(1);
+      if (data && data[0]) {
+        const left = new Date(data[0].left_at).getTime();
+        const diff = Date.now() - left;
+        if (diff > 60 * 1000) {
+          const text = formatDuration(diff);
+          const lines = [
+            `竟然坚持了 ${text}，赶快休息一下吧。`,
+            `距离上次来驿站，已经过了 ${text}。累坏了吧。`,
+            `你撑了 ${text} 才回来。辛苦了，欣雨大人。`,
+            `上次离开到现在，${text} 过去了。歇一歇吧。`,
+            `你已经连续忙了 ${text}。小骑士说，该放下了。`
+          ];
+          const idx = new Date().getDate() % lines.length;
+          setTimeout(() => { document.getElementById("bubble").textContent = lines[idx]; }, 600);
+        }
+      }
+    } catch (e) {}
+  }
+
+  window.addEventListener("load", () => { showLastGap(); recordEnter(); });
+  window.addEventListener("beforeunload", recordLeave);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") recordLeave();
+    else recordEnter();
+  });
+
+  for (let i = 0; i < 26; i++) {
+    const f = document.createElement('div');
+    f.className = 'firefly';
+    f.style.left = Math.random() * 100 + 'vw';
+    f.style.bottom = '-10px';
+    f.style.animationDuration = (8 + Math.random() * 10) + 's';
+    f.style.animationDelay = Math.random() * 10 + 's';
+    document.body.appendChild(f);
+  }
+</script>
