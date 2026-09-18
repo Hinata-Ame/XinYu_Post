@@ -262,8 +262,8 @@ rest
   <audio id="bgm" src="assets/bgm.mp3" loop></audio>
 
 <script>
-  const SUPABASE_URL = "你的ProjectURL";
-  const SUPABASE_KEY = "你的anonKey";
+  const SUPABASE_URL = "";
+  const SUPABASE_KEY = "sb_publishable_yYQ6suvuHFIE7JGoBXZ7HA_2dPub5Qv";
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const VISITOR = "xinyu";
 
