@@ -344,38 +344,3 @@
         const left = new Date(data[0].left_at).getTime();
         const diff = Date.now() - left;
         if (diff > 60 * 1000) {
-          const text = formatDuration(diff);
-          const lines = [
-            `竟然坚持了 ${text}，赶快休息一下吧。`,
-            `距离上次来驿站，已经过了 ${text}。累坏了吧。`,
-            `你撑了 ${text} 才回来。辛苦了，欣雨大人。`,
-            `上次离开到现在，${text} 过去了。歇一歇吧。`,
-            `你已经连续忙了 ${text}。小骑士说，该放下了。`
-          ];
-          const idx = new Date().getDate() % lines.length;
-          setTimeout(() => { document.getElementById("bubble").textContent = lines[idx]; }, 600);
-        }
-      }
-    } catch (e) {}
-  }
-
-  window.addEventListener("load", () => { showLastGap(); recordEnter(); });
-  window.addEventListener("beforeunload", recordLeave);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") recordLeave();
-    else recordEnter();
-  });
-
-  for (let i = 0; i < 26; i++) {
-    const f = document.createElement('div');
-    f.className = 'firefly';
-    f.style.left = Math.random() * 100 + 'vw';
-    f.style.bottom = '-10px';
-    f.style.animationDuration = (8 + Math.random() * 10) + 's';
-    f.style.animationDelay = Math.random() * 10 + 's';
-    document.body.appendChild(f);
-  }
-</script>
-</body>
-</html>
-
