@@ -1,2 +1,363 @@
 # XinYu_Post
 rest
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>欣雨大人的专属驿站</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #f4ecdf;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 80px;
+    overflow-x: hidden;
+    background: url('assets/inn-bg.jpg') center/cover no-repeat fixed, #2a1c12;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(rgba(40,25,12,0.55), rgba(20,12,6,0.8));
+    pointer-events: none;
+    z-index: 0;
+  }
+  .wrap {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 460px;
+  }
+  h1 {
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: #ffe9c4;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 18px rgba(255,190,120,0.6);
+    margin-bottom: 4px;
+    text-align: center;
+  }
+  .sub {
+    font-size: 12px;
+    color: #d8bf98;
+    margin-bottom: 26px;
+    letter-spacing: 2px;
+  }
+  .signboard {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(#8b5a2b, #6f431d);
+    border: 4px solid #4a2c11;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 26px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.35);
+    text-align: center;
+  }
+  .signboard::before, .signboard::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px; height: 14px;
+    background: #4a2c11;
+  }
+  .signboard::before { top: -14px; }
+  .signboard::after { bottom: -14px; }
+  .signboard .pin {
+    position: absolute;
+    top: 8px; left: 14px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #d94a4a;
+    box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  }
+  .signboard p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #fff4e0;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  }
+  .signboard .title {
+    font-size: 15px;
+    letter-spacing: 2px;
+    color: #ffd98a;
+    margin-bottom: 6px;
+  }
+  .station {
+    position: relative;
+    width: 100%;
+    min-height: 340px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,200,140,0.35);
+    background: rgba(40,24,12,0.45);
+    box-shadow: inset 0 0 50px rgba(255,170,80,0.15), 0 10px 30px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 24px 18px 30px;
+    overflow: hidden;
+  }
+  .lamp {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(255,190,110,0.55) 0%, rgba(255,180,90,0) 70%);
+    pointer-events: none;
+  }
+  .characters {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 36px;
+    margin-bottom: 22px;
+  }
+  .char {
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    filter: drop-shadow(0 0 14px rgba(255,200,120,0.6));
+    animation: bob 2.6s ease-in-out infinite;
+    user-select: none;
+  }
+  .char:active { transform: scale(0.9); }
+  .char img { width: 108px; height: auto; display: block; pointer-events: none; }
+  .char.hornet img { width: 98px; }
+  .char.hornet { animation-delay: 0.6s; }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .bubble {
+    max-width: 330px;
+    min-height: 58px;
+    background: rgba(255,244,224,0.96);
+    color: #3a2412;
+    padding: 14px 18px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    position: relative;
+    text-align: center;
+    transition: opacity 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  }
+  .bubble::after {
+    content: "";
+    position: absolute;
+    top: -8px; left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid rgba(255,244,224,0.96);
+  }
+  .hint {
+    margin-top: 18px;
+    font-size: 12px;
+    color: #c9ab84;
+    letter-spacing: 2px;
+  }
+  .music-btn {
+    position: fixed;
+    right: 16px;
+    top: 16px;
+    z-index: 5;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,210,150,0.6);
+    background: rgba(60,36,18,0.7);
+    color: #ffd98a;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+  .music-btn:active { transform: scale(0.9); }
+  .music-btn.playing { animation: spin 3s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .blessing {
+    margin-top: 34px;
+    font-size: 13px;
+    color: #d8bf98;
+    text-align: center;
+    line-height: 2;
+    letter-spacing: 1px;
+  }
+  .blessing .name {
+    color: #ffb3c8;
+    text-shadow: 0 0 10px rgba(255,150,190,0.6);
+  }
+  .firefly {
+    position: fixed;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #ffd98a;
+    box-shadow: 0 0 8px 2px rgba(255,200,120,0.9);
+    pointer-events: none;
+    animation: float linear infinite;
+    opacity: 0.7;
+    z-index: 1;
+  }
+  @keyframes float {
+    0% { transform: translateY(0); opacity: 0; }
+    10% { opacity: 0.8; }
+    50% { transform: translateY(-40vh) translateX(20px); }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-80vh) translateX(-20px); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+  <button class="music-btn" id="musicBtn" onclick="toggleMusic()">♪</button>
+
+  <div class="wrap">
+    <h1>欣雨大人的专属驿站</h1>
+    <div class="sub">— 累了就进来歇一会儿 —</div>
+
+    <div class="signboard">
+      <div class="pin"></div>
+      <div class="title">今日公告</div>
+      <p>辛苦了，欣雨大人。<br>今天可以什么都不做，只在这里歇一歇。</p>
+    </div>
+
+    <div class="station">
+      <div class="lamp"></div>
+      <div class="characters">
+        <div class="char knight" onclick="talk('knight')">
+          <img src="assets/knight.png" alt="小骑士">
+        </div>
+        <div class="char hornet" onclick="talk('hornet')">
+          <img src="assets/hornet.png" alt="黄蜂女">
+        </div>
+      </div>
+      <div class="bubble" id="bubble">轻触他们，听听他们会说什么 ✦</div>
+    </div>
+
+    <div class="hint">点一下小骑士，点一下黄蜂女</div>
+
+    <div class="blessing">
+      愿 <span class="name">雾笙</span> 的每一天<br>
+      都有光，有风，有不期而遇的温柔<br>
+      <span style="color:#a88a63; font-size:12px;">—— 皓月 敬上</span>
+    </div>
+  </div>
+
+  <audio id="bgm" src="assets/bgm.mp3" loop></audio>
+
+<script>
+  const SUPABASE_URL = "你的ProjectURL";
+  const SUPABASE_KEY = "你的anonKey";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const VISITOR = "xinyu";
+
+  const knightLines = [
+    "今天也辛苦啦，欢迎回到驿站。",
+    "这里没有点名，没有扣分，只有你在。",
+    "你可以什么都不做，只是待着，也很好。",
+    "明天的事，交给明天的你。",
+    "驿站永远为你亮着灯。",
+    "晚安，欣雨大人。"
+  ];
+  const hornetLines = [
+    "嘎啦嘛！",
+    "嘎啦嘛！累的时候就别硬撑了。",
+    "嘎啦嘛！早八什么的，砍了它。",
+    "嘎啦嘛！你已经很厉害了。",
+    "嘎啦嘛！好好吃饭，好好睡觉。"
+  ];
+
+  function talk(who) {
+    const b = document.getElementById('bubble');
+    const pool = who === 'hornet' ? hornetLines : knightLines;
+    const line = pool[Math.floor(Math.random() * pool.length)];
+    b.style.opacity = 0;
+    setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
+  }
+
+  const bgm = document.getElementById('bgm');
+  const btn = document.getElementById('musicBtn');
+  let playing = false;
+  function toggleMusic() {
+    if (playing) { bgm.pause(); btn.classList.remove('playing'); btn.textContent = '♪'; }
+    else { bgm.volume = 0.4; bgm.play().catch(() => {}); btn.classList.add('playing'); btn.textContent = '❚❚'; }
+    playing = !playing;
+  }
+
+  function formatDuration(ms) {
+    const totalMin = Math.floor(ms / 60000);
+    const days = Math.floor(totalMin / 1440);
+    const hours = Math.floor((totalMin % 1440) / 60);
+    const mins = totalMin % 60;
+    let parts = [];
+    if (days > 0) parts.push(days + "天");
+    if (hours > 0) parts.push(hours + "小时");
+    if (mins > 0) parts.push(mins + "分钟");
+    if (parts.length === 0) parts.push("刚刚");
+    return parts.join("");
+  }
+
+  async function recordEnter() {
+    await supabase.from("visits").insert({ visitor: VISITOR, entered_at: new Date().toISOString() });
+  }
+  async function recordLeave() {
+    const { data } = await supabase.from("visits").select("*").eq("visitor", VISITOR).is("left_at", null).order("entered_at", { ascending: false }).limit(1);
+    if (data && data[0]) {
+      await supabase.from("visits").update({ left_at: new Date().toISOString() }).eq("id", data[0].id);
+    }
+  }
+  async function showLastGap() {
+    const { data } = await supabase.from("visits").select("*").eq("visitor", VISITOR).not("left_at", "is", null).order("left_at", { ascending: false }).limit(1);
+    if (data && data[0]) {
+      const left = new Date(data[0].left_at).getTime();
+      const diff = Date.now() - left;
+      if (diff > 60 * 1000) {
+        const text = formatDuration(diff);
+        const lines = [
+          `竟然坚持了 ${text}，赶快休息一下吧。`,
+          `距离上次来驿站，已经过了 ${text}。累坏了吧。`,
+          `你撑了 ${text} 才回来。辛苦了，欣雨大人。`,
+          `上次离开到现在，${text} 过去了。歇一歇吧。`,
+          `你已经连续忙了 ${text}。小骑士说，该放下了。`
+        ];
+        const idx = new Date().getDate() % lines.length;
+        setTimeout(() => { document.getElementById("bubble").textContent = lines[idx]; }, 600);
+      }
+    }
+  }
+
+  window.addEventListener("load", () => { showLastGap(); recordEnter(); });
+  window.addEventListener("beforeunload", recordLeave);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") recordLeave();
+    else recordEnter();
+  });
+
+  for (let i = 0; i < 26; i++) {
+    const f = document.createElement('div');
+    f.className = 'firefly';
+    f.style.left = Math.random() * 100 + 'vw';
+    f.style.bottom = '-10px';
+    f.style.animationDuration = (8 + Math.random() * 10) + 's';
+    f.style.animationDelay = Math.random() * 10 + 's';
+    document.body.appendChild(f);
+  }
+</script>
+</body>
+</html>
