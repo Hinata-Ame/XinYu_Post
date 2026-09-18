@@ -1,5 +1,3 @@
-# XinYu_Post
-rest
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -262,9 +260,9 @@ rest
   <audio id="bgm" src="./assets/bgm.mp3" loop></audio>
 
 <script>
-  const SUPABASE_URL = "jnwxccfzaoxjxwcemgjq";
-  const SUPABASE_KEY = "sb_publishable_yYQ6suvuHFIE7JGoBXZ7HA_2dPub5Qv";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const SUPABASE_URL = "你的ProjectURL";
+  const SUPABASE_KEY = "你的anonKey";
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const VISITOR = "xinyu";
 
   const knightLines = [
@@ -295,8 +293,16 @@ rest
   const btn = document.getElementById('musicBtn');
   let playing = false;
   function toggleMusic() {
-    if (playing) { bgm.pause(); btn.classList.remove('playing'); btn.textContent = '♪'; }
-    else { bgm.volume = 0.4; bgm.play().catch(() => {}); btn.classList.add('playing'); btn.textContent = '❚❚'; }
+    if (playing) {
+      bgm.pause();
+      btn.classList.remove('playing');
+      btn.textContent = '♪';
+    } else {
+      bgm.volume = 0.4;
+      bgm.play().catch(() => {});
+      btn.classList.add('playing');
+      btn.textContent = '❚❚';
+    }
     playing = !playing;
   }
 
@@ -314,32 +320,43 @@ rest
   }
 
   async function recordEnter() {
-    await supabase.from("visits").insert({ visitor: VISITOR, entered_at: new Date().toISOString() });
+    try {
+      await db.from("visits").insert({
+        visitor: VISITOR,
+        entered_at: new Date().toISOString()
+      });
+    } catch (e) {}
   }
+
   async function recordLeave() {
-    const { data } = await supabase.from("visits").select("*").eq("visitor", VISITOR).is("left_at", null).order("entered_at", { ascending: false }).limit(1);
-    if (data && data[0]) {
-      await supabase.from("visits").update({ left_at: new Date().toISOString() }).eq("id", data[0].id);
-    }
-  }
-  async function showLastGap() {
-    const { data } = await supabase.from("visits").select("*").eq("visitor", VISITOR).not("left_at", "is", null).order("left_at", { ascending: false }).limit(1);
-    if (data && data[0]) {
-      const left = new Date(data[0].left_at).getTime();
-      const diff = Date.now() - left;
-      if (diff > 60 * 1000) {
-        const text = formatDuration(diff);
-        const lines = [
-          `竟然坚持了 ${text}，赶快休息一下吧。`,
-          `距离上次来驿站，已经过了 ${text}。累坏了吧。`,
-          `你撑了 ${text} 才回来。辛苦了，欣雨大人。`,
-          `上次离开到现在，${text} 过去了。歇一歇吧。`,
-          `你已经连续忙了 ${text}。小骑士说，该放下了。`
-        ];
-        const idx = new Date().getDate() % lines.length;
-        setTimeout(() => { document.getElementById("bubble").textContent = lines[idx]; }, 600);
+    try {
+      const { data } = await db.from("visits").select("*").eq("visitor", VISITOR).is("left_at", null).order("entered_at", { ascending: false }).limit(1);
+      if (data && data[0]) {
+        await db.from("visits").update({ left_at: new Date().toISOString() }).eq("id", data[0].id);
       }
-    }
+    } catch (e) {}
+  }
+
+  async function showLastGap() {
+    try {
+      const { data } = await db.from("visits").select("*").eq("visitor", VISITOR).not("left_at", "is", null).order("left_at", { ascending: false }).limit(1);
+      if (data && data[0]) {
+        const left = new Date(data[0].left_at).getTime();
+        const diff = Date.now() - left;
+        if (diff > 60 * 1000) {
+          const text = formatDuration(diff);
+          const lines = [
+            `竟然坚持了 ${text}，赶快休息一下吧。`,
+            `距离上次来驿站，已经过了 ${text}。累坏了吧。`,
+            `你撑了 ${text} 才回来。辛苦了，欣雨大人。`,
+            `上次离开到现在，${text} 过去了。歇一歇吧。`,
+            `你已经连续忙了 ${text}。小骑士说，该放下了。`
+          ];
+          const idx = new Date().getDate() % lines.length;
+          setTimeout(() => { document.getElementById("bubble").textContent = lines[idx]; }, 600);
+        }
+      }
+    } catch (e) {}
   }
 
   window.addEventListener("load", () => { showLastGap(); recordEnter(); });
@@ -361,3 +378,4 @@ rest
 </script>
 </body>
 </html>
+
