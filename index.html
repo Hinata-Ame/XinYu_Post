@@ -293,19 +293,28 @@
   const btn = document.getElementById('musicBtn');
   let playing = false;
 
-  function toggleMusic() {
-    if (playing) {
-      bgm.pause();
-      btn.classList.remove('playing');
-      btn.textContent = '♪';
-    } else {
-      bgm.volume = 0.4;
-      bgm.play().catch(() => {});
-      btn.classList.add('playing');
-      btn.textContent = '❚❚';
+ function toggleMusic() {
+  if (playing) {
+    bgm.pause();
+    btn.classList.remove('playing');
+    btn.textContent = '♪';
+  } else {
+    bgm.muted = false;
+    bgm.volume = 0.6;
+    const p = bgm.play();
+    if (p) {
+      p.then(() => {}).catch(() => {
+        bgm.muted = true;
+        bgm.play().then(() => {
+          setTimeout(() => { bgm.muted = false; }, 100);
+        }).catch(() => {});
+      });
     }
-    playing = !playing;
+    btn.classList.add('playing');
+    btn.textContent = '❚❚';
   }
+  playing = !playing;
+}
 
   function formatDuration(ms) {
     const totalMin = Math.floor(ms / 60000);
