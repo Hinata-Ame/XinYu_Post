@@ -224,8 +224,8 @@
 <body>
 
   <button class="music-btn" id="musicBtn"
-  onclick="toggleMusic()"
-  ondblclick="nextTrack()">♪</button>
+    onclick="toggleMusic()"
+    ondblclick="nextTrack()">♪</button>
 
   <div class="wrap">
     <h1>欣雨大人的专属驿站</h1>
@@ -250,7 +250,7 @@
       <div class="bubble" id="bubble">轻触他们，听听他们会说什么 ✦</div>
     </div>
 
-    <div class="hint">点一下小骑士，点一下黄蜂女</div>
+    <div class="hint">点一下小骑士，点一下黄蜂女，双击右上角切歌</div>
 
     <div class="blessing">
       愿 <span class="name">雾笙</span> 的每一天<br>
@@ -262,8 +262,8 @@
   <audio id="bgm" loop></audio>
 
 <script>
-  const SUPABASE_URL = "https://jnwxccfzaoxjxwcemgjq.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impud3hjY2Z6YW94anh3Y2VtZ2pxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MjA3NDEsImV4cCI6MjEwNTI5Njc0MX0.U5xDZYrSpcqev05SeXXd8KeoEiMyVtAKoDZ7nu0BuQ8";
+  const SUPABASE_URL = "你的ProjectURL";
+  const SUPABASE_KEY = "你的anonKey";
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const VISITOR = "xinyu";
 
@@ -290,38 +290,24 @@
     b.style.opacity = 0;
     setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
   }
+
+  // ===== 音乐部分 =====
   const playlist = [
-  "./assets/bgm1.mp3",
-  "./assets/bgm2.mp3",
-  "./assets/bgm3.mp3"
-];
-let currentTrack = 0;
+    "./assets/bgm1.mp3",
+    "./assets/bgm2.mp3",
+    "./assets/bgm3.mp3"
+  ];
+  let currentTrack = 0;
 
-const bgm = document.getElementById('bgm');
-const btn = document.getElementById('musicBtn');
-let playing = false;
+  const bgm = document.getElementById('bgm');
+  const btn = document.getElementById('musicBtn');
+  let playing = false;
 
-function loadTrack(i) {
-  bgm.src = playlist[i];
-}
-
-function toggleMusic() {
-  if (!bgm.src) loadTrack(currentTrack);
-  if (playing) {
-    bgm.pause();
-    btn.classList.remove('playing');
-    btn.textContent = '♪';
-  } else {
-    bgm.volume = 0.5;
-    bgm.play().catch(() => {});
-    btn.classList.add('playing');
-    btn.textContent = '❚❚';
+  function loadTrack(i) {
+    bgm.src = playlist[i];
   }
-  playing = !playing;
-}
 
-// 长按或双击按钮切歌
-function toggleMusic() {
+  function toggleMusic() {
     if (!bgm.src) loadTrack(currentTrack);
     if (playing) {
       bgm.pause();
@@ -349,7 +335,8 @@ function toggleMusic() {
       }).catch(() => {});
     }
   }
- 
+
+  // ===== 访问记录 =====
   function formatDuration(ms) {
     const totalMin = Math.floor(ms / 60000);
     const days = Math.floor(totalMin / 1440);
@@ -374,16 +361,24 @@ function toggleMusic() {
 
   async function recordLeave() {
     try {
-      const { data } = await db.from("visits").select("*").eq("visitor", VISITOR).is("left_at", null).order("entered_at", { ascending: false }).limit(1);
+      const { data } = await db.from("visits")
+        .select("*").eq("visitor", VISITOR)
+        .is("left_at", null)
+        .order("entered_at", { ascending: false }).limit(1);
       if (data && data[0]) {
-        await db.from("visits").update({ left_at: new Date().toISOString() }).eq("id", data[0].id);
+        await db.from("visits")
+          .update({ left_at: new Date().toISOString() })
+          .eq("id", data[0].id);
       }
     } catch (e) {}
   }
 
   async function showLastGap() {
     try {
-      const { data } = await db.from("visits").select("*").eq("visitor", VISITOR).not("left_at", "is", null).order("left_at", { ascending: false }).limit(1);
+      const { data } = await db.from("visits")
+        .select("*").eq("visitor", VISITOR)
+        .not("left_at", "is", null)
+        .order("left_at", { ascending: false }).limit(1);
       if (data && data[0]) {
         const left = new Date(data[0].left_at).getTime();
         const diff = Date.now() - left;
@@ -397,7 +392,9 @@ function toggleMusic() {
             `你已经连续忙了 ${text}。小骑士说，该放下了。`
           ];
           const idx = new Date().getDate() % lines.length;
-          setTimeout(() => { document.getElementById("bubble").textContent = lines[idx]; }, 600);
+          setTimeout(() => {
+            document.getElementById("bubble").textContent = lines[idx];
+          }, 600);
         }
       }
     } catch (e) {}
@@ -410,6 +407,7 @@ function toggleMusic() {
     else recordEnter();
   });
 
+  // 萤火
   for (let i = 0; i < 26; i++) {
     const f = document.createElement('div');
     f.className = 'firefly';
