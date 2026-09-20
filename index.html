@@ -290,12 +290,6 @@
     b.style.opacity = 0;
     setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
   }
-
-  const bgm = document.getElementById('bgm');
-  const btn = document.getElementById('musicBtn');
-  let playing = false;
-
- function toggleMusic() {
   const playlist = [
   "./assets/bgm1.mp3",
   "./assets/bgm2.mp3",
@@ -327,15 +321,35 @@ function toggleMusic() {
 }
 
 // 长按或双击按钮切歌
-function nextTrack() {
-  currentTrack = (currentTrack + 1) % playlist.length;
-  loadTrack(currentTrack);
-  if (playing) {
-    bgm.play().catch(() => {});
+function toggleMusic() {
+    if (!bgm.src) loadTrack(currentTrack);
+    if (playing) {
+      bgm.pause();
+      btn.classList.remove('playing');
+      btn.textContent = '♪';
+    } else {
+      bgm.volume = 0.5;
+      bgm.play().catch(() => {});
+      btn.classList.add('playing');
+      btn.textContent = '❚❚';
+    }
+    playing = !playing;
   }
-}
-}
 
+  function nextTrack() {
+    currentTrack = (currentTrack + 1) % playlist.length;
+    loadTrack(currentTrack);
+    if (playing) {
+      bgm.play().catch(() => {});
+    } else {
+      bgm.play().then(() => {
+        playing = true;
+        btn.classList.add('playing');
+        btn.textContent = '❚❚';
+      }).catch(() => {});
+    }
+  }
+ 
   function formatDuration(ms) {
     const totalMin = Math.floor(ms / 60000);
     const days = Math.floor(totalMin / 1440);
@@ -406,3 +420,5 @@ function nextTrack() {
     document.body.appendChild(f);
   }
 </script>
+</body>
+</html>
