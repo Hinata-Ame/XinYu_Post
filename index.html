@@ -257,7 +257,7 @@
     </div>
   </div>
 
-  <audio id="bgm" src="./assets/bgm.mp3" loop></audio>
+  <audio id="bgm" loop></audio>
 
 <script>
   const SUPABASE_URL = "https://jnwxccfzaoxjxwcemgjq.supabase.co";
@@ -294,26 +294,44 @@
   let playing = false;
 
  function toggleMusic() {
+  const playlist = [
+  "./assets/bgm1.mp3",
+  "./assets/bgm2.mp3",
+  "./assets/bgm3.mp3"
+];
+let currentTrack = 0;
+
+const bgm = document.getElementById('bgm');
+const btn = document.getElementById('musicBtn');
+let playing = false;
+
+function loadTrack(i) {
+  bgm.src = playlist[i];
+}
+
+function toggleMusic() {
+  if (!bgm.src) loadTrack(currentTrack);
   if (playing) {
     bgm.pause();
     btn.classList.remove('playing');
     btn.textContent = '♪';
   } else {
-    bgm.muted = false;
-    bgm.volume = 0.6;
-    const p = bgm.play();
-    if (p) {
-      p.then(() => {}).catch(() => {
-        bgm.muted = true;
-        bgm.play().then(() => {
-          setTimeout(() => { bgm.muted = false; }, 100);
-        }).catch(() => {});
-      });
-    }
+    bgm.volume = 0.5;
+    bgm.play().catch(() => {});
     btn.classList.add('playing');
     btn.textContent = '❚❚';
   }
   playing = !playing;
+}
+
+// 长按或双击按钮切歌
+function nextTrack() {
+  currentTrack = (currentTrack + 1) % playlist.length;
+  loadTrack(currentTrack);
+  if (playing) {
+    bgm.play().catch(() => {});
+  }
+}
 }
 
   function formatDuration(ms) {
