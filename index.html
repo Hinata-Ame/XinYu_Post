@@ -122,21 +122,43 @@
     gap: 36px;
     margin-bottom: 22px;
   }
-  .char {
-    cursor: pointer;
-    transition: transform 0.15s ease;
-    filter: drop-shadow(0 0 14px rgba(255,200,120,0.6));
-    animation: bob 2.6s ease-in-out infinite;
-    user-select: none;
-  }
-  .char:active { transform: scale(0.9); }
-  .char img { width: 108px; height: auto; display: block; pointer-events: none; }
-  .char.hornet img { width: 98px; }
-  .char.hornet { animation-delay: 0.6s; }
-  @keyframes bob {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
+ .char {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  filter: drop-shadow(0 0 14px rgba(255,200,120,0.6));
+  user-select: none;
+  animation: idleSway 3.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+.char:nth-child(2) { animation-duration: 4.2s; }
+.char:active { transform: scale(0.94); }
+.char img {
+  width: 108px;
+  height: auto;
+  display: block;
+  pointer-events: none;
+  transition: transform 0.1s;
+}
+.char.hornet img { width: 98px; }
+
+/* 待机呼吸+摇晃 */
+@keyframes idleSway {
+  0%   { transform: rotate(-1.2deg) translateY(0); }
+  50%  { transform: rotate(1.2deg) translateY(-8px); }
+  100% { transform: rotate(-1.2deg) translateY(0); }
+}
+
+/* 被点击时跳一下 */
+.char.jump {
+  animation: jumpOnce 0.5s ease;
+}
+@keyframes jumpOnce {
+  0%   { transform: translateY(0) scale(1); }
+  30%  { transform: translateY(-30px) scale(1.05); }
+  60%  { transform: translateY(0) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
   .bubble {
     max-width: 330px;
     min-height: 58px;
@@ -240,10 +262,10 @@
     <div class="station">
       <div class="lamp"></div>
       <div class="characters">
-        <div class="char knight" onclick="talk('knight')">
+        <div class="char knight" onclick="talk('knight', this)">
           <img src="./assets/knight.png" alt="小骑士">
         </div>
-        <div class="char hornet" onclick="talk('hornet')">
+        <div class="char hornet" onclick="talk('hornet', this)">
           <img src="./assets/hornet.png" alt="黄蜂女">
         </div>
       </div>
@@ -284,14 +306,18 @@ const VISITOR = isMe ? "test" : "xinyu";
     "嘎啦嘛！好好吃饭，好好睡觉。"
   ];
 
-  function talk(who) {
-    const b = document.getElementById('bubble');
-    const pool = who === 'hornet' ? hornetLines : knightLines;
-    const line = pool[Math.floor(Math.random() * pool.length)];
-    b.style.opacity = 0;
-    setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
-  }
+  function talk(who, el) {
+  const b = document.getElementById('bubble');
+  const pool = who === 'hornet' ? hornetLines : knightLines;
+  const line = pool[Math.floor(Math.random() * pool.length)];
+  b.style.opacity = 0;
+  setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
 
+  if (el && !el.classList.contains('jump')) {
+    el.classList.add('jump');
+    setTimeout(() => el.classList.remove('jump'), 520);
+  }
+}
   // ===== 音乐部分 =====
   const playlist = [
     "./assets/bgm1.mp3",
@@ -418,6 +444,16 @@ const VISITOR = isMe ? "test" : "xinyu";
     f.style.animationDelay = Math.random() * 10 + 's';
     document.body.appendChild(f);
   }
+ document.addEventListener('mousemove', (e) => {
+  const imgs = document.querySelectorAll('.char img');
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  const dx = (e.clientX - cx) / cx;
+  const dy = (e.clientY - cy) / cy;
+  imgs.forEach(img => {
+    img.style.transform = `translate(${dx * 6}px, ${dy * 4}px) rotate(${dx * 2}deg)`;
+  });
+});
 </script>
 </body>
 </html>
