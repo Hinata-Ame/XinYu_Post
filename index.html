@@ -283,7 +283,6 @@
   </div>
 
   <audio id="bgm" loop></audio>
-  <audio id="hornetSound" preload="auto"></audio>
 
 <script>
   const SUPABASE_URL = "https://jnwxccfzaoxjxwcemgjq.supabase.co";
@@ -308,7 +307,7 @@ const VISITOR = isMe ? "test" : "xinyu";
     "嘎啦嘛！好好吃饭，好好睡觉。"
   ];
 
-  const hornetSounds = [
+ const hornetSounds = [
   "./assets/hornet1.mp3",
   "./assets/hornet2.mp3",
   "./assets/hornet3.mp3",
@@ -320,17 +319,15 @@ const VISITOR = isMe ? "test" : "xinyu";
 let lastHornetSound = -1;
 
 function playHornetSound() {
-  const s = document.getElementById('hornetSound');
-  if (!s) return;
   let idx = Math.floor(Math.random() * hornetSounds.length);
   if (hornetSounds.length > 1 && idx === lastHornetSound) {
     idx = (idx + 1) % hornetSounds.length;
   }
   lastHornetSound = idx;
-  s.src = hornetSounds[idx];
-  s.volume = 0.8;
-  s.currentTime = 0;
-  s.play().catch(() => {});
+
+  const a = new Audio(hornetSounds[idx]);
+  a.volume = 0.8;
+  a.play().catch(() => {});
 }
 
 function talk(who, el) {
