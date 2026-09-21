@@ -283,6 +283,7 @@
   </div>
 
   <audio id="bgm" loop></audio>
+  <audio id="hornetSound" preload="auto"></audio>
 
 <script>
   const SUPABASE_URL = "https://jnwxccfzaoxjxwcemgjq.supabase.co";
@@ -307,7 +308,32 @@ const VISITOR = isMe ? "test" : "xinyu";
     "嘎啦嘛！好好吃饭，好好睡觉。"
   ];
 
-  function talk(who, el) {
+  const hornetSounds = [
+  "./assets/hornet1.mp3",
+  "./assets/hornet2.mp3",
+  "./assets/hornet3.mp3",
+  "./assets/hornet4.mp3",
+  "./assets/hornet5.mp3",
+  "./assets/hornet6.mp3",
+  "./assets/hornet7.mp3"
+];
+let lastHornetSound = -1;
+
+function playHornetSound() {
+  const s = document.getElementById('hornetSound');
+  if (!s) return;
+  let idx = Math.floor(Math.random() * hornetSounds.length);
+  if (hornetSounds.length > 1 && idx === lastHornetSound) {
+    idx = (idx + 1) % hornetSounds.length;
+  }
+  lastHornetSound = idx;
+  s.src = hornetSounds[idx];
+  s.volume = 0.8;
+  s.currentTime = 0;
+  s.play().catch(() => {});
+}
+
+function talk(who, el) {
   const b = document.getElementById('bubble');
   const pool = who === 'hornet' ? hornetLines : knightLines;
   const line = pool[Math.floor(Math.random() * pool.length)];
@@ -317,6 +343,10 @@ const VISITOR = isMe ? "test" : "xinyu";
   if (el && !el.classList.contains('jump')) {
     el.classList.add('jump');
     setTimeout(() => el.classList.remove('jump'), 520);
+  }
+
+  if (who === 'hornet') {
+    playHornetSound();
   }
 }
   // ===== 音乐部分 =====
