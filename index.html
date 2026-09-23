@@ -296,7 +296,10 @@
   onclick="talk('knight', this)">
   <img src="./assets/knight.png" alt="小骑士">
 </div>
-        <div class="char hornet" onclick="talk('hornet', this)">
+        <div class="char hornet"
+          data-normal="./assets/hornet.png"
+          data-fight="./assets/hornet_fight.png"
+          data-music="./assets/hornet_music.png">
           <img src="./assets/hornet.png" alt="黄蜂女">
         </div>
       </div>
@@ -582,35 +585,65 @@ let lastNewSound = -1;
   }
 document.querySelectorAll('.char').forEach(el => {
   let timer = null;
-  let fighting = false;
+  let mode = "idle"; // idle / fight / music
+  let musicAudio = null;
+  let longPress = false;
 
-  const start = () => {
-    timer = setTimeout(() => {
-      if (!el.dataset.fight) return;
-      fighting = true;
-      const img = el.querySelector('img');
+  const setMode = (m) => {
+    if (mode === m) return;
+    mode = m;
+
+    const img = el.querySelector('img');
+
+    if (musicAudio) {
+      musicAudio.pause();
+      musicAudio.currentTime = 0;
+      musicAudio = null;
+    }
+
+    if (m === "fight" && el.dataset.fight) {
       img.src = el.dataset.fight;
       el.classList.add('fighting');
+      el.classList.remove('music');
+      const a = new Audio(el.classList.contains('hornet') ? './assets/hornet_fight.mp3' : './assets/knight_fight.mp3');
+      a.volume = 0.8;
+      a.play().catch(() => {});
+    } else if (m === "music" && el.dataset.music) {
+      img.src = el.dataset.music;
+      el.classList.add('music');
+      el.classList.remove('fighting');
+      musicAudio = new Audio('./assets/hornet_music.mp3');
+      musicAudio.loop = true;
+      musicAudio.volume = 0.7;
+      musicAudio.play().catch(() => {});
+    } else {
+      img.src = el.dataset.normal;
+      el.classList.remove('fighting');
+      el.classList.remove('music');
+    }
+  };
+
+  const start = () => {
+    longPress = false;
+    timer = setTimeout(() => {
+      longPress = true;
       if (el.classList.contains('hornet')) {
-        const a = new Audio('./assets/hornet_fight.mp3');
-        a.volume = 0.8;
-        a.play().catch(() => {});
-      } else if (el.classList.contains('knight')) {
-        const a = new Audio('./assets/knight_fight.mp3');
-        a.volume = 0.8;
-        a.play().catch(() => {});
+        setMode("music");
+      } else {
+        setMode("fight");
       }
     }, 400);
   };
 
   const end = () => {
     clearTimeout(timer);
-    if (fighting) {
-      fighting = false;
-      const img = el.querySelector('img');
-      img.src = el.dataset.normal;
-      el.classList.remove('fighting');
-    }
+    if (mode !== "idle") setMode("idle");
+  };
+
+  const click = () => {
+    if (longPress) { longPress = false; return; }
+    const who = el.classList.contains('hornet') ? 'hornet' : 'knight';
+    talk(who, el);
   };
 
   el.addEventListener('mousedown', start);
@@ -619,7 +652,19 @@ document.querySelectorAll('.char').forEach(el => {
   el.addEventListener('mouseleave', end);
   el.addEventListener('touchend', end);
   el.addEventListener('touchcancel', end);
+  el.addEventListener('click', click);
 });
+.char.fighting img {
+  width: 180px;
+  transform: scale(2.2);
+  transform-origin: bottom center;
+}
+
+.char.music img {
+  width: 180px;
+  transform: scale(2.2);
+  transform-origin: bottom center;
+}
 </script>
 </body>
 </html>
