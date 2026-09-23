@@ -287,9 +287,7 @@
 <script>
   const SUPABASE_URL = "https://jnwxccfzaoxjxwcemgjq.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impud3hjY2Z6YW94anh3Y2VtZ2pxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MjA3NDEsImV4cCI6MjEwNTI5Njc0MX0.U5xDZYrSpcqev05SeXXd8KeoEiMyVtAKoDZ7nu0BuQ8";
-  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const isMe = new URLSearchParams(location.search).get("me") === "1";
-const VISITOR = isMe ? "test" : "xinyu";
+  const VISITOR = new URLSearchParams(location.search).get("me") === "1" ? "test" : "xinyu";
 
   const knightLines = [
     "今天也辛苦啦，欢迎回到驿站。",
@@ -307,68 +305,66 @@ const VISITOR = isMe ? "test" : "xinyu";
     "嘎啦嘛！好好吃饭，好好睡觉。"
   ];
 
- const hornetSounds = [
-  "./assets/hornet1.mp3",
-  "./assets/hornet2.mp3",
-  "./assets/hornet3.mp3",
-  "./assets/hornet4.mp3",
-  "./assets/hornet5.mp3",
-  "./assets/hornet6.mp3",
-  "./assets/hornet7.mp3"
-];
-let lastHornetSound = -1;
+  const hornetSounds = [
+    "./assets/hornet1.mp3",
+    "./assets/hornet2.mp3",
+    "./assets/hornet3.mp3",
+    "./assets/hornet4.mp3",
+    "./assets/hornet5.mp3",
+    "./assets/hornet6.mp3",
+    "./assets/hornet7.mp3"
+  ];
+  let lastHornetSound = -1;
 
-function playHornetSound() {
-  let idx = Math.floor(Math.random() * hornetSounds.length);
-  if (hornetSounds.length > 1 && idx === lastHornetSound) {
-    idx = (idx + 1) % hornetSounds.length;
-  }
-  lastHornetSound = idx;
-
-  const a = new Audio(hornetSounds[idx]);
-  a.volume = 0.8;
-  a.play().catch(() => {});
-}
-
-function playKnightSound() {
-  const a = new Audio('./assets/knight_sound.mp3');
-  a.volume = 0.8;
-  a.play().catch(() => {});
-}
-
-function talk(who, el) {
-  const b = document.getElementById('bubble');
-  const pool = who === 'hornet' ? hornetLines : knightLines;
-  const line = pool[Math.floor(Math.random() * pool.length)];
-  b.style.opacity = 0;
-  setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
-
-  if (el && !el.classList.contains('jump')) {
-    el.classList.add('jump');
-    setTimeout(() => el.classList.remove('jump'), 520);
-  }
-
-  if (who === 'hornet') {
-    playHornetSound();
-  } else if (who === 'knight') {
-    playKnightSound();
-  }
-}
-  // ===== 音乐部分 =====
   const playlist = [
     "./assets/bgm1.mp3",
     "./assets/bgm2.mp3",
     "./assets/bgm3.mp3"
   ];
   let currentTrack = 0;
+  let playing = false;
 
   const bgm = document.getElementById('bgm');
   const btn = document.getElementById('musicBtn');
-  let playing = false;
+  let db = null;
 
-  function loadTrack(i) {
-    bgm.src = playlist[i];
+  function talk(who, el) {
+    const b = document.getElementById('bubble');
+    const pool = who === 'hornet' ? hornetLines : knightLines;
+    const line = pool[Math.floor(Math.random() * pool.length)];
+    b.style.opacity = 0;
+    setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
+
+    if (el && !el.classList.contains('jump')) {
+      el.classList.add('jump');
+      setTimeout(() => el.classList.remove('jump'), 520);
+    }
+
+    if (who === 'hornet') {
+      playHornetSound();
+    } else if (who === 'knight') {
+      playKnightSound();
+    }
   }
+
+  function playHornetSound() {
+    let idx = Math.floor(Math.random() * hornetSounds.length);
+    if (hornetSounds.length > 1 && idx === lastHornetSound) {
+      idx = (idx + 1) % hornetSounds.length;
+    }
+    lastHornetSound = idx;
+    const a = new Audio(hornetSounds[idx]);
+    a.volume = 0.8;
+    a.play().catch(() => {});
+  }
+
+  function playKnightSound() {
+    const a = new Audio('./assets/knight_sound.mp3');
+    a.volume = 0.8;
+    a.play().catch(() => {});
+  }
+
+  function loadTrack(i) { bgm.src = playlist[i]; }
 
   function toggleMusic() {
     if (!bgm.src) loadTrack(currentTrack);
@@ -388,9 +384,8 @@ function talk(who, el) {
   function nextTrack() {
     currentTrack = (currentTrack + 1) % playlist.length;
     loadTrack(currentTrack);
-    if (playing) {
-      bgm.play().catch(() => {});
-    } else {
+    if (playing) { bgm.play().catch(() => {}); }
+    else {
       bgm.play().then(() => {
         playing = true;
         btn.classList.add('playing');
@@ -399,7 +394,6 @@ function talk(who, el) {
     }
   }
 
-  // ===== 访问记录 =====
   function formatDuration(ms) {
     const totalMin = Math.floor(ms / 60000);
     const days = Math.floor(totalMin / 1440);
@@ -414,6 +408,7 @@ function talk(who, el) {
   }
 
   async function recordEnter() {
+    if (!db) return;
     try {
       await db.from("visits").insert({
         visitor: VISITOR,
@@ -423,6 +418,7 @@ function talk(who, el) {
   }
 
   async function recordLeave() {
+    if (!db) return;
     try {
       const { data } = await db.from("visits")
         .select("*").eq("visitor", VISITOR)
@@ -437,6 +433,7 @@ function talk(who, el) {
   }
 
   async function showLastGap() {
+    if (!db) return;
     try {
       const { data } = await db.from("visits")
         .select("*").eq("visitor", VISITOR)
@@ -463,14 +460,36 @@ function talk(who, el) {
     } catch (e) {}
   }
 
-  window.addEventListener("load", () => { showLastGap(); recordEnter(); });
+  function initSupabase() {
+    try {
+      if (!SUPABASE_URL.startsWith("http")) return;
+      if (!window.supabase) return;
+      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch (e) { db = null; }
+  }
+
+  window.addEventListener("load", () => {
+    initSupabase();
+    showLastGap();
+    recordEnter();
+  });
   window.addEventListener("beforeunload", recordLeave);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") recordLeave();
     else recordEnter();
   });
 
-  // 萤火
+  document.addEventListener('mousemove', (e) => {
+    const imgs = document.querySelectorAll('.char img');
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const dx = (e.clientX - cx) / cx;
+    const dy = (e.clientY - cy) / cy;
+    imgs.forEach(img => {
+      img.style.transform = `translate(${dx * 6}px, ${dy * 4}px) rotate(${dx * 2}deg)`;
+    });
+  });
+
   for (let i = 0; i < 26; i++) {
     const f = document.createElement('div');
     f.className = 'firefly';
@@ -480,16 +499,6 @@ function talk(who, el) {
     f.style.animationDelay = Math.random() * 10 + 's';
     document.body.appendChild(f);
   }
-document.addEventListener('mousemove', (e) => {
-  const imgs = document.querySelectorAll('.char img');
-  const cx = window.innerWidth / 2;
-  const cy = window.innerHeight / 2;
-  const dx = (e.clientX - cx) / cx;
-  const dy = (e.clientY - cy) / cy;
-  imgs.forEach(img => {
-    img.style.transform = `translate(${dx * 6}px, ${dy * 4}px) rotate(${dx * 2}deg)`;
-  });
-});
 </script>
 </body>
 </html>
