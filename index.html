@@ -297,24 +297,65 @@
     "驿站永远为你亮着灯。",
     "晚安，欣雨大人。"
   ];
-  const hornetLines = [
-    "嘎啦嘛！",
-    "嘎啦嘛！累的时候就别硬撑了。",
-    "嘎啦嘛！早八什么的，砍了它。",
-    "嘎啦嘛！你已经很厉害了。",
-    "嘎啦嘛！好好吃饭，好好睡觉。"
-  ];
+ const hornetLinesOld = [
+  "嘎啦嘛！",
+  "嘎啦嘛！累的时候就别硬撑了。",
+  "嘎啦嘛！早八什么的，砍了它。",
+  "嘎啦嘛！你已经很厉害了。",
+  "嘎啦嘛！好好吃饭，好好睡觉。"
+];
 
-  const hornetSounds = [
-    "./assets/hornet1.mp3",
-    "./assets/hornet2.mp3",
-    "./assets/hornet3.mp3",
-    "./assets/hornet4.mp3",
-    "./assets/hornet5.mp3",
-    "./assets/hornet6.mp3",
-    "./assets/hornet7.mp3"
-  ];
-  let lastHornetSound = -1;
+const hornetSoundsOld = [
+  "./assets/hornet1.mp3",
+  "./assets/hornet2.mp3",
+  "./assets/hornet3.mp3",
+  "./assets/hornet4.mp3",
+  "./assets/hornet5.mp3",
+  "./assets/hornet6.mp3",
+  "./assets/hornet7.mp3"
+];
+
+const hornetLinesNew = [
+  "又见面了，欣雨大人。",
+  "今天的你，也很帅。",
+  "休息不是偷懒，是回血。",
+  "想哭就哭，我不笑你。",
+  "早八是怪物，你才是勇者。",
+  "你不需要表现得好，才配被喜欢。",
+  "把委屈先寄存在我这儿。",
+  "你已经比自己想的强很多。",
+  "六人间也能睡出好梦。",
+  "今晚早点睡，准许。",
+  "谁让你难过，我替你扎他。",
+  "明天的事，明天再说。",
+  "记得抬头看看天。",
+  "慢慢来，我不赶你走。",
+  "你的名字，是雾里的笙。",
+  "你不是一个人。",
+  "今天走过的路，都算数。",
+  "站了一天的你，辛苦了。",
+  "上课别硬撑，困了就眨眨眼。",
+  "如果累了，就靠一会儿。",
+  "我在这儿，灯也亮着。",
+  "你比你以为的更值得。",
+  "别急，先喘口气。",
+  "想发呆就发呆。",
+  "你已经做得够好了。",
+  "今天先这样，明天再战。",
+  "别把自己逼太紧。",
+  "喝口水，再继续。",
+  "有空就回来坐坐。",
+  "你开心，我就开心。",
+  "晚安，欣雨大人。"
+];
+
+const hornetSoundsNew = [];
+for (let i = 8; i <= 38; i++) {
+  hornetSoundsNew.push("./assets/hornet" + i + ".mp3");
+}
+
+let lastOldSound = -1;
+let lastNewSound = -1;
 
   const playlist = [
     "./assets/bgm1.mp3",
@@ -329,35 +370,45 @@
   let db = null;
 
   function talk(who, el) {
-    const b = document.getElementById('bubble');
-    const pool = who === 'hornet' ? hornetLines : knightLines;
-    const line = pool[Math.floor(Math.random() * pool.length)];
-    b.style.opacity = 0;
-    setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
+  const b = document.getElementById('bubble');
+  let line;
 
-    if (el && !el.classList.contains('jump')) {
-      el.classList.add('jump');
-      setTimeout(() => el.classList.remove('jump'), 520);
-    }
-
-    if (who === 'hornet') {
-      playHornetSound();
-    } else if (who === 'knight') {
-      playKnightSound();
-    }
+  if (who === 'hornet') {
+    const useOld = Math.random() < 0.5;
+    const pool = useOld ? hornetLinesOld : hornetLinesNew;
+    line = pool[Math.floor(Math.random() * pool.length)];
+    playHornetSound(useOld);
+  } else {
+    line = knightLines[Math.floor(Math.random() * knightLines.length)];
+    playKnightSound();
   }
 
-  function playHornetSound() {
-    let idx = Math.floor(Math.random() * hornetSounds.length);
-    if (hornetSounds.length > 1 && idx === lastHornetSound) {
-      idx = (idx + 1) % hornetSounds.length;
-    }
-    lastHornetSound = idx;
-    const a = new Audio(hornetSounds[idx]);
+  b.style.opacity = 0;
+  setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
+
+  if (el && !el.classList.contains('jump')) {
+    el.classList.add('jump');
+    setTimeout(() => el.classList.remove('jump'), 520);
+  }
+}
+
+ function playHornetSound(useOld) {
+  if (useOld) {
+    let idx = Math.floor(Math.random() * hornetSoundsOld.length);
+    if (idx === lastOldSound) idx = (idx + 1) % hornetSoundsOld.length;
+    lastOldSound = idx;
+    const a = new Audio(hornetSoundsOld[idx]);
+    a.volume = 0.8;
+    a.play().catch(() => {});
+  } else {
+    let idx = Math.floor(Math.random() * hornetSoundsNew.length);
+    if (idx === lastNewSound) idx = (idx + 1) % hornetSoundsNew.length;
+    lastNewSound = idx;
+    const a = new Audio(hornetSoundsNew[idx]);
     a.volume = 0.8;
     a.play().catch(() => {});
   }
-
+}
   function playKnightSound() {
     const a = new Audio('./assets/knight_sound.mp3');
     a.volume = 0.8;
