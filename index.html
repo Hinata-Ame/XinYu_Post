@@ -330,6 +330,12 @@ function playHornetSound() {
   a.play().catch(() => {});
 }
 
+function playKnightSound() {
+  const a = new Audio('./assets/knight_sound.mp3');
+  a.volume = 0.8;
+  a.play().catch(() => {});
+}
+
 function talk(who, el) {
   const b = document.getElementById('bubble');
   const pool = who === 'hornet' ? hornetLines : knightLines;
@@ -344,6 +350,8 @@ function talk(who, el) {
 
   if (who === 'hornet') {
     playHornetSound();
+  } else if (who === 'knight') {
+    playKnightSound();
   }
 }
   // ===== 音乐部分 =====
