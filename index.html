@@ -242,6 +242,22 @@
     90% { opacity: 0.6; }
     100% { transform: translateY(-80vh) translateX(-20px); opacity: 0; }
   }
+.ori {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  width: 90px;
+  height: auto;
+  z-index: 4;
+  filter: drop-shadow(0 0 12px rgba(120,220,255,0.7));
+  animation: oriFloat 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes oriFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+} 
 </style>
 </head>
 <body>
@@ -262,6 +278,7 @@
 
     <div class="station">
       <div class="lamp"></div>
+      <img src="./assets/ori.png" alt="奥日" class="ori">
       <div class="characters">
         <div class="char knight" onclick="talk('knight', this)">
           <img src="./assets/knight.png" alt="小骑士">
