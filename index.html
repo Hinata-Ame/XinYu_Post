@@ -319,7 +319,7 @@
 
 <script>
   const SUPABASE_URL = "https://jnwxccfzaoxjxwcemgjq.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impud3hjY2Z6YW94anh3Y2VtZ2pxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MjA3NDEsImV4cCI6MjEwNTI5Njc0MX0.U5xDZYrSpcqev05SeXXd8KeoEiMyVtAKoDZ7nu0BuQ8";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impud3hjY2Z6YW94anh3Y2VtZ2pxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MjA3NDEsImV4cCI6MjEwNTI5Njc0MX0.U5xDZYrSpcqev05SeXXd8KeoEiMyVtAKoDZ7nu0BuQ8"
   const VISITOR = new URLSearchParams(location.search).get("me") === "1" ? "test" : "xinyu";
 
   const knightLines = [
@@ -330,65 +330,60 @@
     "驿站永远为你亮着灯",
     "晚安，欣雨大人"
   ];
- const hornetLinesOld = [
-  "嘎啦嘛！",
-  "嘎啦嘛！累的时候就别硬撑了",
-  "嘎啦嘛！早八什么的，砍了它",
-  "嘎啦嘛！你已经很厉害了",
-  "嘎啦嘛！别忘了笑一笑"
-];
+  const hornetLinesOld = [
+    "嘎啦嘛！",
+    "嘎啦嘛！累的时候就别硬撑了",
+    "嘎啦嘛！早八什么的，砍了它",
+    "嘎啦嘛！你已经很厉害了",
+    "嘎啦嘛！别忘了笑一笑"
+  ];
+  const hornetLinesNew = [
+    "又见面了，欣雨阁下",
+    "今天的你也很帅！",
+    "圣巢会庇佑你",
+    "是个很坚强的虫虫呢",
+    "早八很危险，挺起胸膛，勇士",
+    "不需要表现得很好，不管怎么样，我都很敬佩你",
+    "要哭会儿吗？这儿很安静",
+    "我曾守望过一个将死的国度，同样的角色我不想再扮第二次，你也是，加油",
+    "六人间也能睡出好梦",
+    "我意已决，不能就这样离开。必须重返地底（不能离开你），解放纺络（解开你的结）",
+    "谁让你难过，我替你扎他。",
+    "明天的事，明天再说。",
+    "记得抬头看看天。",
+    "鲜少有虫如你这般，俏丽的异乡猎手",
+    "你说皓日？我当然认识，他比你想象的要更加挺拔，忠诚",
+    "他叫我来守护你，嘴里呢喃着什么不能让你一个人忍受这些",
+    "今天走了那么久，到这里坐会儿吧",
+    "站了一天了，辛苦了",
+    "接下来想做什么？",
+    "不觉得这地方少了一点什么吗？要去和他提下意见吗？",
+    "嗯，我在这儿，灯也亮着",
+    "你真的很厉害，能走到这里，听会儿音乐，放松一下吧",
+    "别急，先喘口气。",
+    "他（皓日）真的每天都来问我你最近咋样，确实烦，要我去把他赶走吗？",
+    "你已经做得够好了，我这有多余的灵丝，给你回口血吧",
+    "我的丝线原本只能坚持这么久，但是他却...所以我才能站在这，守护你，他让我给你带句话：我会守护你的",
+    "别把自己逼太紧了，休息会儿",
+    "喝口蜜露，再继续",
+    "有空就回来坐坐",
+    "你开心，我就开心，他也会开心的",
+    "晚安，欣雨大人"
+  ];
 
-const hornetSoundsOld = [
-  "./assets/hornet1.mp3",
-  "./assets/hornet2.mp3",
-  "./assets/hornet3.mp3",
-  "./assets/hornet4.mp3",
-  "./assets/hornet5.mp3",
-  "./assets/hornet6.mp3",
-  "./assets/hornet7.mp3"
-];
-
-const hornetLinesNew = [
-  "又见面了，欣雨阁下",
-  "今天的你也很帅！",
-  "圣巢会庇佑你",
-  "是个很坚强的虫虫呢",
-  "早八很危险，挺起胸膛，勇士",
-  "不需要表现得很好，不管怎么样，我都很敬佩你",
-  "要哭会儿吗？这儿很安静",
-  "我曾守望过一个将死的国度，同样的角色我不想再扮第二次，你也是，加油",
-  "六人间也能睡出好梦",
-  "我意已决，不能就这样离开。必须重返地底（不能离开你），解放纺络（解开你的结）",
-  "谁让你难过，我替你扎他。",
-  "明天的事，明天再说。",
-  "记得抬头看看天。",
-  "鲜少有虫如你这般，俏丽的异乡猎手",
-  "你说皓日？我当然认识，他比你想象的要更加挺拔，忠诚",
-  "他叫我来守护你，嘴里呢喃着什么不能让你一个人忍受这些",
-  "今天走了那么久，到这里坐会儿吧",
-  "站了一天了，辛苦了",
-  "接下来想做什么？",
-  "不觉得这地方少了一点什么吗？要去和他提下意见吗？",
-  "嗯，我在这儿，灯也亮着",
-  "你真的很厉害，能走到这里，听会儿音乐，放松一下吧",
-  "别急，先喘口气。",
-  "他（皓日）真的每天都来问我你最近咋样，确实烦，要我去把他赶走吗？",
-  "你已经做得够好了，我这有多余的灵丝，给你回口血吧",
-  "我的丝线原本只能坚持这么久，但是他却...所以我才能站在这，守护你，他让我给你带句话：我会守护你的",
-  "别把自己逼太紧了，休息会儿",
-  "喝口蜜露，再继续",
-  "有空就回来坐坐",
-  "你开心，我就开心，他也会开心的",
-  "晚安，欣雨大人"
-];
-
-const hornetSoundsNew = [];
-for (let i = 8; i <= 38; i++) {
-  hornetSoundsNew.push("./assets/hornet" + i + ".mp3");
-}
-
-let lastOldSound = -1;
-let lastNewSound = -1;
+  const hornetSoundsOld = [
+    "./assets/hornet1.mp3",
+    "./assets/hornet2.mp3",
+    "./assets/hornet3.mp3",
+    "./assets/hornet4.mp3",
+    "./assets/hornet5.mp3",
+    "./assets/hornet6.mp3",
+    "./assets/hornet7.mp3"
+  ];
+  const hornetSoundsNew = [];
+  for (let i = 8; i <= 38; i++) {
+    hornetSoundsNew.push("./assets/hornet" + i + ".mp3");
+  }
 
   const playlist = [
     "./assets/bgm1.mp3",
@@ -397,51 +392,54 @@ let lastNewSound = -1;
   ];
   let currentTrack = 0;
   let playing = false;
+  let lastOldSound = -1;
+  let lastNewSound = -1;
 
   const bgm = document.getElementById('bgm');
   const btn = document.getElementById('musicBtn');
   let db = null;
 
   function talk(who, el) {
-  const b = document.getElementById('bubble');
-  let line;
+    const b = document.getElementById('bubble');
+    let line;
 
-  if (who === 'hornet') {
-    const useOld = Math.random() < 0.5;
-    const pool = useOld ? hornetLinesOld : hornetLinesNew;
-    line = pool[Math.floor(Math.random() * pool.length)];
-    playHornetSound(useOld);
-  } else {
-    line = knightLines[Math.floor(Math.random() * knightLines.length)];
-    playKnightSound();
+    if (who === 'hornet') {
+      const useOld = Math.random() < 0.5;
+      const pool = useOld ? hornetLinesOld : hornetLinesNew;
+      line = pool[Math.floor(Math.random() * pool.length)];
+      playHornetSound(useOld);
+    } else {
+      line = knightLines[Math.floor(Math.random() * knightLines.length)];
+      playKnightSound();
+    }
+
+    b.style.opacity = 0;
+    setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
+
+    if (el && !el.classList.contains('jump')) {
+      el.classList.add('jump');
+      setTimeout(() => el.classList.remove('jump'), 520);
+    }
   }
 
-  b.style.opacity = 0;
-  setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
-
-  if (el && !el.classList.contains('jump')) {
-    el.classList.add('jump');
-    setTimeout(() => el.classList.remove('jump'), 520);
+  function playHornetSound(useOld) {
+    if (useOld) {
+      let idx = Math.floor(Math.random() * hornetSoundsOld.length);
+      if (idx === lastOldSound) idx = (idx + 1) % hornetSoundsOld.length;
+      lastOldSound = idx;
+      const a = new Audio(hornetSoundsOld[idx]);
+      a.volume = 0.8;
+      a.play().catch(() => {});
+    } else {
+      let idx = Math.floor(Math.random() * hornetSoundsNew.length);
+      if (idx === lastNewSound) idx = (idx + 1) % hornetSoundsNew.length;
+      lastNewSound = idx;
+      const a = new Audio(hornetSoundsNew[idx]);
+      a.volume = 0.8;
+      a.play().catch(() => {});
+    }
   }
-}
 
- function playHornetSound(useOld) {
-  if (useOld) {
-    let idx = Math.floor(Math.random() * hornetSoundsOld.length);
-    if (idx === lastOldSound) idx = (idx + 1) % hornetSoundsOld.length;
-    lastOldSound = idx;
-    const a = new Audio(hornetSoundsOld[idx]);
-    a.volume = 0.8;
-    a.play().catch(() => {});
-  } else {
-    let idx = Math.floor(Math.random() * hornetSoundsNew.length);
-    if (idx === lastNewSound) idx = (idx + 1) % hornetSoundsNew.length;
-    lastNewSound = idx;
-    const a = new Audio(hornetSoundsNew[idx]);
-    a.volume = 0.8;
-    a.play().catch(() => {});
-  }
-}
   function playKnightSound() {
     const a = new Audio('./assets/knight_sound.mp3');
     a.volume = 0.8;
@@ -574,6 +572,77 @@ let lastNewSound = -1;
     });
   });
 
+  document.querySelectorAll('.char').forEach(el => {
+    let timer = null;
+    let mode = "idle";
+    let musicAudio = null;
+    let longPress = false;
+
+    const setMode = (m) => {
+      if (mode === m) return;
+      mode = m;
+      const img = el.querySelector('img');
+
+      if (musicAudio) {
+        musicAudio.pause();
+        musicAudio.currentTime = 0;
+        musicAudio = null;
+      }
+
+      if (m === "fight" && el.dataset.fight) {
+        img.src = el.dataset.fight;
+        el.classList.add('fighting');
+        el.classList.remove('music');
+        const a = new Audio(el.classList.contains('hornet') ? './assets/hornet_fight.mp3' : './assets/knight_fight.mp3');
+        a.volume = 0.8;
+        a.play().catch(() => {});
+      } else if (m === "music" && el.dataset.music) {
+        img.src = el.dataset.music;
+        el.classList.add('music');
+        el.classList.remove('fighting');
+        musicAudio = new Audio('./assets/hornet_music.mp3');
+        musicAudio.loop = true;
+        musicAudio.volume = 0.7;
+        musicAudio.play().catch(() => {});
+      } else {
+        img.src = el.dataset.normal;
+        el.classList.remove('fighting');
+        el.classList.remove('music');
+      }
+    };
+
+    const start = () => {
+      longPress = false;
+      timer = setTimeout(() => {
+        longPress = true;
+        if (el.classList.contains('hornet')) {
+          setMode("music");
+        } else {
+          setMode("fight");
+        }
+      }, 400);
+    };
+
+    const end = () => {
+      clearTimeout(timer);
+      if (mode !== "idle") setMode("idle");
+    };
+
+    const click = () => {
+      if (longPress) { longPress = false; return; }
+      const who = el.classList.contains('hornet') ? 'hornet' : 'knight';
+      talk(who, el);
+    };
+
+    el.addEventListener('mousedown', start);
+    el.addEventListener('touchstart', start, {passive: true});
+    el.addEventListener('mouseup', end);
+    el.addEventListener('mouseleave', end);
+    el.addEventListener('touchend', end);
+    el.addEventListener('touchcancel', end);
+    el.addEventListener('click', click);
+  });
+
   for (let i = 0; i < 26; i++) {
     const f = document.createElement('div');
     f.className = 'firefly';
@@ -583,88 +652,6 @@ let lastNewSound = -1;
     f.style.animationDelay = Math.random() * 10 + 's';
     document.body.appendChild(f);
   }
-document.querySelectorAll('.char').forEach(el => {
-  let timer = null;
-  let mode = "idle"; // idle / fight / music
-  let musicAudio = null;
-  let longPress = false;
-
-  const setMode = (m) => {
-    if (mode === m) return;
-    mode = m;
-
-    const img = el.querySelector('img');
-
-    if (musicAudio) {
-      musicAudio.pause();
-      musicAudio.currentTime = 0;
-      musicAudio = null;
-    }
-
-    if (m === "fight" && el.dataset.fight) {
-      img.src = el.dataset.fight;
-      el.classList.add('fighting');
-      el.classList.remove('music');
-      const a = new Audio(el.classList.contains('hornet') ? './assets/hornet_fight.mp3' : './assets/knight_fight.mp3');
-      a.volume = 0.8;
-      a.play().catch(() => {});
-    } else if (m === "music" && el.dataset.music) {
-      img.src = el.dataset.music;
-      el.classList.add('music');
-      el.classList.remove('fighting');
-      musicAudio = new Audio('./assets/hornet_music.mp3');
-      musicAudio.loop = true;
-      musicAudio.volume = 0.7;
-      musicAudio.play().catch(() => {});
-    } else {
-      img.src = el.dataset.normal;
-      el.classList.remove('fighting');
-      el.classList.remove('music');
-    }
-  };
-
-  const start = () => {
-    longPress = false;
-    timer = setTimeout(() => {
-      longPress = true;
-      if (el.classList.contains('hornet')) {
-        setMode("music");
-      } else {
-        setMode("fight");
-      }
-    }, 400);
-  };
-
-  const end = () => {
-    clearTimeout(timer);
-    if (mode !== "idle") setMode("idle");
-  };
-
-  const click = () => {
-    if (longPress) { longPress = false; return; }
-    const who = el.classList.contains('hornet') ? 'hornet' : 'knight';
-    talk(who, el);
-  };
-
-  el.addEventListener('mousedown', start);
-  el.addEventListener('touchstart', start, {passive: true});
-  el.addEventListener('mouseup', end);
-  el.addEventListener('mouseleave', end);
-  el.addEventListener('touchend', end);
-  el.addEventListener('touchcancel', end);
-  el.addEventListener('click', click);
-});
-.char.fighting img {
-  width: 180px;
-  transform: scale(2.2);
-  transform-origin: bottom center;
-}
-
-.char.music img {
-  width: 180px;
-  transform: scale(2.2);
-  transform-origin: bottom center;
-}
 </script>
 </body>
 </html>
