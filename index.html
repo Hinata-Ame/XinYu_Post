@@ -289,11 +289,19 @@
   bottom: 18px;
   z-index: 5;
   display: block;
-  width: 40px;
-  transition: transform 0.2s;
-  filter: drop-shadow(0 0 12px rgba(255,150,190,0.7));
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
   animation: biliSway 3.6s ease-in-out infinite;
   transform-origin: bottom center;
+  filter: drop-shadow(0 0 10px rgba(255,150,190,0.7));
+}
+
+.bili-entry img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 </style>
 </head>
