@@ -273,6 +273,28 @@
   transform: scale(0.4);
   transform-origin: bottom center;
 }
+ .bili-entry {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 5;
+  display: block;
+  width: 90px;
+  transition: transform 0.2s;
+  filter: drop-shadow(0 0 12px rgba(255,150,190,0.7));
+}
+.bili-entry {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 5;
+  display: block;
+  width: 90px;
+  transition: transform 0.2s;
+  filter: drop-shadow(0 0 12px rgba(255,150,190,0.7));
+  animation: biliSway 3.6s ease-in-out infinite;
+  transform-origin: bottom center;
+}
 </style>
 </head>
 <body>
@@ -289,6 +311,9 @@
       <div class="pin"></div>
       <div class="title">今日公告</div>
       <p>辛苦了，欣雨大人。<br>今天可以什么都不做，只在这里歇一歇。</p>
+      <a href="https://www.bilibili.com" target="_blank" class="bili-entry">
+  <img src="./assets/bilibili.png" alt="B站">
+</a>
     </div>
 
     <div class="station">
