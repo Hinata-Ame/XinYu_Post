@@ -433,6 +433,16 @@
   transition: opacity 1s ease;
 }
 .dark-overlay.active { display: block; }
+ .dark-overlay.active {
+  display: block;
+  opacity: 1; /* 确保亮的时候不透明度是1 */
+}
+/* 强制吹蜡烛时褪色的类 */
+.dark-overlay.fade-out {
+  opacity: 0;
+  transition: opacity 1s ease;
+  pointer-events: none;
+}
 
 /* 提示文字 */
 .birthday-hint {
@@ -1013,35 +1023,38 @@ function handleBirthdayClick() {
       }
     }, 60000);
   }
-  // 阶段 2：吹蜡烛（恢复背景，全体祝福）
+ // 阶段 2：吹蜡烛（恢复背景，全体祝福）
 else if (birthdayStage === 2) {
   clearTimeout(birthdayTimer);
   
-  // 1. 强力灭掉火苗
+  // 1. 灭掉火苗
   const flame = document.getElementById('flameGif');
   if (flame) {
       flame.classList.remove('active');
       flame.style.display = 'none'; 
   }
   
-  // 2. 强力恢复背景亮灯
+  // 2. 让背景慢慢亮起来（先褪色，1秒后再彻底隐藏）
   const overlay = document.getElementById('darkOverlay');
   if (overlay) {
-      overlay.classList.remove('active');
-      overlay.style.display = 'none'; // 强制隐藏，防止CSS卡住
+      overlay.classList.add('fade-out'); // 触发褪色动画
+      setTimeout(() => {
+          overlay.classList.remove('active');
+          overlay.classList.remove('fade-out');
+          overlay.style.display = 'none'; // 彻底隐藏，把舞台让给人物
+      }, 1000);
   }
 
-  // 3. 把所有角色的对话气泡强行改成“生日快乐！”
+  // 3. 全员生日祝福
   const b = document.getElementById('bubble');
-  b.style.opacity = 1; // 确保气泡可见
+  b.style.opacity = 1; 
   b.textContent = "生日快乐！！！🎉"; 
   
-  // 4. 改变提示文字
+  // 4. 提示切蛋糕
   hint.textContent = '开始切蛋糕吧';
   hint.style.display = 'block';
   birthdayStage = 3;
   
-  // 5. 停留5秒后，如果还在阶段3，再次提示（其实点一下就能切了）
   setTimeout(() => {
     if (birthdayStage === 3) {
         hint.textContent = '开始切蛋糕吧';
