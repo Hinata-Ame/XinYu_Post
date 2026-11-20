@@ -1014,30 +1014,40 @@ function handleBirthdayClick() {
     }, 60000);
   }
   // 阶段 2：吹蜡烛（恢复背景，全体祝福）
-  else if (birthdayStage === 2) {
-    clearTimeout(birthdayTimer);
-    document.getElementById('flameGif').classList.remove('active');
-    document.getElementById('darkOverlay').classList.remove('active');
-    
-    // 彩蛋：场上所有角色同时说“生日快乐”
-    const b = document.getElementById('bubble');
-    b.style.opacity = 0;
-    setTimeout(() => { 
-      b.textContent = "生日快乐！！！"; 
-      b.style.opacity = 1; 
-    }, 180);
-    // 你可以在这里加点彩带特效或者音效
-    
-    hint.textContent = '开始切蛋糕吧';
-    birthdayStage = 3;
-    
-    // 停留5秒后再次提示切蛋糕
-    setTimeout(() => {
-      if (birthdayStage === 3) {
-          hint.textContent = '开始切蛋糕吧';
-      }
-    }, 5000);
+else if (birthdayStage === 2) {
+  clearTimeout(birthdayTimer);
+  
+  // 1. 强力灭掉火苗
+  const flame = document.getElementById('flameGif');
+  if (flame) {
+      flame.classList.remove('active');
+      flame.style.display = 'none'; 
   }
+  
+  // 2. 强力恢复背景亮灯
+  const overlay = document.getElementById('darkOverlay');
+  if (overlay) {
+      overlay.classList.remove('active');
+      overlay.style.display = 'none'; // 强制隐藏，防止CSS卡住
+  }
+
+  // 3. 把所有角色的对话气泡强行改成“生日快乐！”
+  const b = document.getElementById('bubble');
+  b.style.opacity = 1; // 确保气泡可见
+  b.textContent = "生日快乐！！！🎉"; 
+  
+  // 4. 改变提示文字
+  hint.textContent = '开始切蛋糕吧';
+  hint.style.display = 'block';
+  birthdayStage = 3;
+  
+  // 5. 停留5秒后，如果还在阶段3，再次提示（其实点一下就能切了）
+  setTimeout(() => {
+    if (birthdayStage === 3) {
+        hint.textContent = '开始切蛋糕吧';
+    }
+  }, 5000);
+}
   // 阶段 3：切蛋糕
   else if (birthdayStage === 3) {
     hint.style.display = 'none';
