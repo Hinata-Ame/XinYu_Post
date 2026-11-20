@@ -735,7 +735,8 @@
   // ================= 生日 DLC 逻辑 =================
   let birthdayStage = 0; 
   let birthdayTimer = null;
-  let replayCount = 0;
+  // 从本地缓存读取记录，如果没有记录就是0
+  let replayCount = parseInt(localStorage.getItem('birthdayReplayCount')) || 0;
 
   function replayBirthday(isYes) {
     const modal = document.getElementById('replayModal');
@@ -743,6 +744,7 @@
     
     if (isYes) {
       replayCount++;
+localStorage.setItem('birthdayReplayCount', replayCount); // 👈 把次数存进浏览器缓存
       birthdayStage = 0;
       document.getElementById('giftBox').classList.remove('opened');
       document.getElementById('cakeBox').classList.remove('show');
