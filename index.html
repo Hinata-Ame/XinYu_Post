@@ -748,7 +748,6 @@ localStorage.setItem('birthdayReplayCount', replayCount); // 👈 把次数存�
       birthdayStage = 0;
       document.getElementById('giftBox').classList.remove('opened');
       document.getElementById('cakeBox').classList.remove('show');
-      document.getElementById('flameGif').classList.remove('active');
       document.getElementById('flameGif').style.display = 'none';
       document.getElementById('darkOverlay').classList.remove('active');
       document.getElementById('birthdayScroll').classList.remove('active');
@@ -773,36 +772,36 @@ localStorage.setItem('birthdayReplayCount', replayCount); // 👈 把次数存�
       setTimeout(() => { hint.textContent = '点蜡烛许愿'; birthdayStage = 1; }, 800);
     } 
     else if (birthdayStage === 1) {
-      const flame = document.getElementById('flameGif');
-      flame.classList.add('active');
-      flame.style.display = 'block';
-      
-      document.getElementById('darkOverlay').classList.add('active');
-      
-      hint.style.display = 'none'; 
-      birthdayStage = 2;
-      
-      birthdayTimer = setTimeout(() => {
-        if (birthdayStage === 2) { hint.textContent = '开始吹蜡烛吧'; hint.style.display = 'block'; }
-      }, 60000);
-    }
+  // 亮起火苗（不需要 const flame 了，直接用 id 找）
+  document.getElementById('flameGif').style.display = 'block';
+  
+  // 黑屏
+  document.getElementById('darkOverlay').classList.add('active');
+  
+  hint.style.display = 'none'; 
+  birthdayStage = 2;
+  
+  birthdayTimer = setTimeout(() => {
+    if (birthdayStage === 2) { hint.textContent = '开始吹蜡烛吧'; hint.style.display = 'block'; }
+  }, 60000);
+}
     else if (birthdayStage === 2) {
-      clearTimeout(birthdayTimer);
-      
-      const flame = document.getElementById('flameGif');
-      flame.classList.remove('active');
-      flame.style.display = 'none'; 
-      
-      document.getElementById('darkOverlay').classList.remove('active');
-      
-      const b = document.getElementById('bubble');
-      b.style.opacity = 1; 
-      b.textContent = "生日快乐！！！🎉"; 
-      
-      hint.textContent = '开始切蛋糕吧';
-      hint.style.display = 'block';
-      birthdayStage = 3;
-    }
+  clearTimeout(birthdayTimer);
+  
+  // 灭掉火苗
+  document.getElementById('flameGif').style.display = 'none'; 
+  
+  // 亮屏
+  document.getElementById('darkOverlay').classList.remove('active');
+  
+  const b = document.getElementById('bubble');
+  b.style.opacity = 1; 
+  b.textContent = "生日快乐！！！🎉"; 
+  
+  hint.textContent = '开始切蛋糕吧';
+  hint.style.display = 'block';
+  birthdayStage = 3;
+}
     else if (birthdayStage === 3) {
       hint.style.display = 'none';
       document.getElementById('birthdayScroll').classList.add('active');
