@@ -357,12 +357,29 @@
   inset: 0;
   z-index: 999;
   display: none; 
-  background: rgba(10, 8, 6, 0.85);
-  backdrop-filter: blur(6px);
+  background: transparent; /* 👈 关键：一开始是透明的！ */
   align-items: center;
   justify-content: center;
   flex-direction: column;
   transition: opacity 0.5s ease;
+}
+
+/* 关灯遮罩，初始必须是透明的 */
+.dark-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85); /* 关灯后的深色 */
+  z-index: 998;
+  display: none;
+  opacity: 0; /* 👈 关键：一开始完全不透明，为了做渐变 */
+  pointer-events: none;
+  transition: opacity 1s ease; /* 1秒变黑或变亮 */
+}
+
+/* 当加上 active 类时，才变成不透明 */
+.dark-overlay.active {
+  display: block;
+  opacity: 1;
 }
 #birthday-dlc.active { display: flex; }
 
@@ -1007,43 +1024,53 @@ function handleBirthdayClick() {
       birthdayStage = 1;
     }, 800);
   } 
-  // 阶段 1：点蜡烛（全屏变暗）
-  else if (birthdayStage === 1) {
-    document.getElementById('flameGif').classList.add('active');
-    document.getElementById('darkOverlay').classList.add('active');
-    
-    hint.style.display = 'none'; // 黑暗中先隐藏提示
-    birthdayStage = 2;
-    
-    // 等待 1 分钟后提示“开始吹蜡烛吧”
-    birthdayTimer = setTimeout(() => {
-      if (birthdayStage === 2) {
-        hint.textContent = '开始吹蜡烛吧';
-        hint.style.display = 'block';
-      }
-    }, 60000);
-  }
- // 阶段 2：吹蜡烛（恢复背景，全体祝福）
+  // 阶段 1：点蜡烛（这时候才拉窗帘变黑！）
+else if (birthdayStage === 1) {
+  // 火苗亮起
+  document.getElementById('flameGif').classList.add('active');
+  document.getElementById('flameGif').style.display = 'block';
+  
+  // 窗帘拉上，全屏变暗
+  document.getElementById('darkOverlay').classList.add('active');
+  
+  // 隐藏提示，等待1分钟
+  hint.style.display = 'none'; 
+  birthdayStage = 2;
+  
+  birthdayTimer = setTimeout(() => {
+    if (birthdayStage === 2) {
+      hint.textContent = '开始吹蜡烛吧';
+      hint.style.display = 'block';
+    }
+  }, 60000);
+}
+// 阶段 2：吹蜡烛（开灯！恢复原样！）
 else if (birthdayStage === 2) {
   clearTimeout(birthdayTimer);
   
-  // 1. 灭掉火苗
+  // 火苗熄灭
   const flame = document.getElementById('flameGif');
-  if (flame) {
-      flame.classList.remove('active');
-      flame.style.display = 'none'; 
-  }
+  flame.classList.remove('active');
+  flame.style.display = 'none'; 
   
-  // 2. 让背景慢慢亮起来（先褪色，1秒后再彻底隐藏）
-  const overlay = document.getElementById('darkOverlay');
-  if (overlay) {
-      overlay.classList.add('fade-out'); // 触发褪色动画
-      setTimeout(() => {
-          overlay.classList.remove('active');
-          overlay.classList.remove('fade-out');
-          overlay.style.display = 'none'; // 彻底隐藏，把舞台让给人物
-      }, 1000);
-  }
+  // 窗帘拉开，全屏亮起
+  document.getElementById('darkOverlay').classList.remove('active');
+  
+  // 人物说话（注意：因为 backdrop-filter 可能会阻碍视角，这里气泡直接弹出来）
+  const b = document.getElementById('bubble');
+  b.style.opacity = 1; 
+  b.textContent = "生日快乐！！！🎉"; 
+  
+  hint.textContent = '开始切蛋糕吧';
+  hint.style.display = 'block';
+  birthdayStage = 3;
+  
+  setTimeout(() => {
+    if (birthdayStage === 3) {
+        hint.textContent = '开始切蛋糕吧';
+    }
+  }, 5000);
+}
 
   // 3. 全员生日祝福
   const b = document.getElementById('bubble');
