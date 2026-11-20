@@ -351,6 +351,146 @@
   color: #ffd98a;
   min-height: 18px;
 }
+ /* ====== 生日 DLC 样式 ====== */
+#birthday-dlc {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: none; 
+  background: rgba(10, 8, 6, 0.85);
+  backdrop-filter: blur(6px);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: opacity 0.5s ease;
+}
+#birthday-dlc.active { display: flex; }
+
+.gift-container {
+  position: relative;
+  width: 260px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* 礼物盒动画 */
+.gift-box {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gift-box.opened {
+  opacity: 0;
+  transform: scale(0.8) translateY(50px); 
+  pointer-events: none;
+}
+.gift-box img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+
+/* 蛋糕与火苗 */
+.cake-box {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  opacity: 0;
+  transform: scale(0.5) translateY(100px); 
+  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); 
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cake-box.show {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+.cake-box img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+
+.flame-gif {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: auto;
+  display: none;
+  pointer-events: none;
+}
+.flame-gif.active { display: block; }
+
+/* 关灯遮罩 */
+.dark-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 998;
+  display: none;
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+.dark-overlay.active { display: block; }
+
+/* 提示文字 */
+.birthday-hint {
+  margin-top: 30px;
+  font-size: 18px;
+  color: #ffd98a;
+  text-shadow: 0 0 10px rgba(255, 200, 120, 0.8);
+  text-align: center;
+  animation: pulse 1.5s infinite;
+  transition: opacity 0.3s;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+/* 滚动小字 */
+.birthday-scroll-text {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  color: #ffe9c4;
+  letter-spacing: 2px;
+  display: none;
+}
+.birthday-scroll-text.active {
+  display: block;
+  animation: scrollUp 2s ease forwards;
+}
+@keyframes scrollUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* 弹窗 */
+.birthday-replay-modal {
+  position: absolute;
+  top: 20%;
+  background: rgba(60, 36, 18, 0.95);
+  border: 2px solid #ffd98a;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  z-index: 1000;
+  display: none;
+}
+.birthday-replay-modal.active { display: block; }
+.birthday-replay-modal button {
+  margin: 10px;
+  padding: 6px 16px;
+  background: #8b5a2b;
+  border: 1px solid #4a2c11;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -408,6 +548,41 @@
   </div>
 
   <audio id="bgm" loop></audio>
+ <!-- ====== 生日 DLC 界面 ====== -->
+<div class="dark-overlay" id="darkOverlay"></div>
+
+<div id="birthday-dlc">
+  <div class="gift-container" id="giftContainer" onclick="handleBirthdayClick()">
+    <!-- 礼物盒 -->
+    <div class="gift-box" id="giftBox">
+      <img src="./assets/birthday1.png" alt="礼物盒">
+    </div>
+    <!-- 蛋糕 -->
+    <div class="cake-box" id="cakeBox">
+      <img src="./assets/birthday4.png" alt="蛋糕">
+      <!-- 火焰 -->
+      <img src="./assets/birthday2.gif" class="flame-gif" id="flameGif" alt="火苗">
+    </div>
+  </div>
+
+  <div class="birthday-hint" id="birthdayHint">点击拆开</div>
+  
+  <div class="birthday-scroll-text" id="birthdayScroll">
+    又是一年，祝学姐永远开开心心快快乐乐，永不掉档，嘿嘿
+  </div>
+
+  <!-- 重进弹窗 -->
+  <div class="birthday-replay-modal" id="replayModal">
+    <p>是否想重新体验？</p>
+    <button onclick="replayBirthday(true)">是</button>
+    <button onclick="replayBirthday(false)">否</button>
+  </div>
+  
+  <!-- 纪念盒彩蛋（先隐藏） -->
+  <div id="memoryBox" style="position: absolute; right: 20px; bottom: 20px; cursor: pointer; display: none;" onclick="alert('纪念盒功能已触发！2027.01.05 节点已记录。')">
+      <img src="./assets/birthday3.png" style="width: 60px; height: auto; filter: drop-shadow(0 0 10px rgba(255,200,120,0.8));">
+  </div>
+</div>
 
 <script>
   const SUPABASE_URL = "https://jnwxccfzaoxjxwcemgjq.supabase.co";
@@ -764,6 +939,186 @@
     msg.textContent = '对不起，信没保护好，再来一次吧';
   }
 }
+ // ================= 生日 DLC 核心逻辑 =================
+const isBirthdayOpen = 1; // 1月5日开启用 1，平时用 0
+let birthdayStage = 0; 
+let birthdayTimer = null;
+let replayCount = 0;
+
+window.addEventListener('load', () => {
+  if (isBirthdayOpen === 1) {
+    document.getElementById('birthday-dlc').classList.add('active');
+    // 第一次加载直接问要不要体验
+    document.getElementById('replayModal').classList.add('active'); 
+  }
+});
+
+function replayBirthday(isYes) {
+  const modal = document.getElementById('replayModal');
+  modal.classList.remove('active');
+  
+  if (isYes) {
+    replayCount++;
+    // 重置状态
+    birthdayStage = 0;
+    document.getElementById('giftBox').classList.remove('opened');
+    document.getElementById('cakeBox').classList.remove('show');
+    document.getElementById('flameGif').classList.remove('active');
+    document.getElementById('darkOverlay').classList.remove('active');
+    document.getElementById('birthdayScroll').classList.remove('active');
+    
+    const hint = document.getElementById('birthdayHint');
+    hint.style.display = 'block';
+    hint.textContent = '点击拆开';
+    
+    // 彩蛋四：点“是”超过3次，解锁纪念盒
+    if (replayCount >= 3) {
+      document.getElementById('memoryBox').style.display = 'block';
+    }
+  } else {
+    // 不体验，直接退出 DLC，恢复日常页面
+    document.getElementById('birthday-dlc').classList.remove('active');
+    document.getElementById('darkOverlay').classList.remove('active');
+  }
+}
+
+function handleBirthdayClick() {
+  const hint = document.getElementById('birthdayHint');
+  
+  // 阶段 0：拆礼物
+  if (birthdayStage === 0) {
+    document.getElementById('giftBox').classList.add('opened');
+    setTimeout(() => {
+      document.getElementById('cakeBox').classList.add('show');
+    }, 400);
+    
+    setTimeout(() => {
+      hint.textContent = '点蜡烛许愿';
+      birthdayStage = 1;
+    }, 800);
+  } 
+  // 阶段 1：点蜡烛（全屏变暗）
+  else if (birthdayStage === 1) {
+    document.getElementById('flameGif').classList.add('active');
+    document.getElementById('darkOverlay').classList.add('active');
+    
+    hint.style.display = 'none'; // 黑暗中先隐藏提示
+    birthdayStage = 2;
+    
+    // 等待 1 分钟后提示“开始吹蜡烛吧”
+    birthdayTimer = setTimeout(() => {
+      if (birthdayStage === 2) {
+        hint.textContent = '开始吹蜡烛吧';
+        hint.style.display = 'block';
+      }
+    }, 60000);
+  }
+  // 阶段 2：吹蜡烛（恢复背景，全体祝福）
+  else if (birthdayStage === 2) {
+    clearTimeout(birthdayTimer);
+    document.getElementById('flameGif').classList.remove('active');
+    document.getElementById('darkOverlay').classList.remove('active');
+    
+    // 彩蛋：场上所有角色同时说“生日快乐”
+    const b = document.getElementById('bubble');
+    b.style.opacity = 0;
+    setTimeout(() => { 
+      b.textContent = "生日快乐！！！"; 
+      b.style.opacity = 1; 
+    }, 180);
+    // 你可以在这里加点彩带特效或者音效
+    
+    hint.textContent = '开始切蛋糕吧';
+    birthdayStage = 3;
+    
+    // 停留5秒后再次提示切蛋糕
+    setTimeout(() => {
+      if (birthdayStage === 3) {
+          hint.textContent = '开始切蛋糕吧';
+      }
+    }, 5000);
+  }
+  // 阶段 3：切蛋糕
+  else if (birthdayStage === 3) {
+    hint.style.display = 'none';
+    const scroll = document.getElementById('birthdayScroll');
+    scroll.classList.add('active');
+    birthdayStage = 4;
+  }
+}
+
+// ====== 彩蛋二 & 彩蛋三：修改原有的角色长按与点击逻辑 ======
+// 注意：你要找到你原来代码里 `document.querySelectorAll('.char').forEach` 的那一段。
+// 把里面的 `start` (长按) 和 `click` (短按) 稍微改一下：
+
+/*
+找到你原代码里的这一段，替换掉：
+
+const start = () => {
+  longPress = false;
+  timer = setTimeout(() => {
+    longPress = true;
+    if (el.classList.contains('hornet')) {
+      setMode("music");
+    } else {
+      setMode("fight");
+    }
+  }, 400);
+};
+*/
+
+// 替换为带生日彩蛋的版本：
+const start = () => {
+  longPress = false;
+  timer = setTimeout(() => {
+    longPress = true;
+    
+    // 彩蛋二：如果是生日期间，长按小骑士被ban
+    if (isBirthdayOpen === 1 && !el.classList.contains('hornet')) {
+      const b = document.getElementById('bubble');
+      b.style.opacity = 0;
+      setTimeout(() => { b.textContent = "被ban了，生日期间禁止搞破坏。"; b.style.opacity = 1; }, 180);
+      return; // 阻止执行后面的战斗形态切换
+    }
+
+    if (el.classList.contains('hornet')) {
+      setMode("music");
+    } else {
+      setMode("fight");
+    }
+  }, 400);
+};
+
+/*
+找到原代码里的 `talk` 函数。在函数开头加一段生日彩蛋逻辑。
+*/
+const originalTalk = talk; // 备份原函数
+talk = function(who, el) {
+  if (isBirthdayOpen === 1) {
+    const b = document.getElementById('bubble');
+    const birthdayLines = [
+      "生日快乐！欣雨大人！",
+      "祝学姐年年岁岁，永不掉档！",
+      "今天是你的专属节日！",
+      "生日快乐！接下来的每一天都要开心！"
+    ];
+    const line = birthdayLines[Math.floor(Math.random() * birthdayLines.length)];
+    
+    if (who === 'hornet') { playHornetSound(true); }
+    else { playKnightSound(); }
+
+    b.style.opacity = 0;
+    setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
+    
+    if (el && !el.classList.contains('jump')) {
+      el.classList.add('jump');
+      setTimeout(() => el.classList.remove('jump'), 520);
+    }
+    return; // 拦截原本的普通台词
+  }
+  // 如果不在生日期间，正常说话
+  originalTalk(who, el);
+};
 </script>
 </body>
 </html>
