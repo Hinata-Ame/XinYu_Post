@@ -409,8 +409,8 @@
 /* 蛋糕与火苗 */
 .cake-box {
   position: absolute;
-  width: 220px;
-  height: 220px;
+  width: 50px;
+  height: 50px;
   opacity: 0;
   transform: scale(0.5) translateY(100px); 
   transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); 
@@ -693,6 +693,35 @@
   let db = null;
 
   function talk(who, el) {
+   function talk(who, el) {
+  // 生日彩蛋拦截
+  if (typeof isBirthdayOpen !== 'undefined' && isBirthdayOpen === 1) {
+      const bubble = document.getElementById('bubble');
+      const birthdayLines = [
+        "生日快乐！欣雨大人！",
+        "祝学姐年年岁岁，永不掉档！",
+        "今天是你的专属节日！",
+        "接下来的每一天都要开心！"
+      ];
+      const line = birthdayLines[Math.floor(Math.random() * birthdayLines.length)];
+      
+      if (who === 'hornet') { playHornetSound(true); } 
+      else { playKnightSound(); }
+      
+      bubble.style.opacity = 0;
+      setTimeout(() => { bubble.textContent = line; bubble.style.opacity = 1; }, 180);
+      
+      if (el && !el.classList.contains('jump')) {
+        el.classList.add('jump');
+        setTimeout(() => el.classList.remove('jump'), 520);
+      }
+      return; // 拦截成功，直接退出，不执行原来的逻辑
+  }
+
+  // 下面是你原本的代码，保持不变
+  const b = document.getElementById('bubble');
+  let line;
+  ... 
     const b = document.getElementById('bubble');
     let line;
 
@@ -1141,16 +1170,6 @@ const start = () => {
 /*
 找到原代码里的 `talk` 函数。在函数开头加一段生日彩蛋逻辑。
 */
-const originalTalk = talk; // 备份原函数
-talk = function(who, el) {
-  if (isBirthdayOpen === 1) {
-    const b = document.getElementById('bubble');
-    const birthdayLines = [
-      "生日快乐！欣雨大人！",
-      "祝学姐年年岁岁，永不掉档！",
-      "今天是你的专属节日！",
-      "生日快乐！接下来的每一天都要开心！"
-    ];
     const line = birthdayLines[Math.floor(Math.random() * birthdayLines.length)];
     
     if (who === 'hornet') { playHornetSound(true); }
