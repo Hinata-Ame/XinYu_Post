@@ -439,9 +439,10 @@
         <img src="./assets/birthday1.png" alt="礼物盒">
       </div>
       <div class="cake-box" id="cakeBox">
-        <img src="./assets/birthday4.png" alt="蛋糕">
-        <img src="./assets/birthday2.gif" class="flame-gif" id="flameGif" alt="火苗">
-      </div>
+  <img src="./assets/birthday4.png" id="wholeCake" alt="蛋糕">
+  <img src="./assets/birthday5.png" id="cutCake" alt="切好的蛋糕" style="display: none;">
+  <img src="./assets/birthday2.gif" class="flame-gif" id="flameGif" alt="火苗">
+</div>
     </div>
     <div class="birthday-hint" id="birthdayHint">点击拆开</div>
     <div class="birthday-scroll-text" id="birthdayScroll">
@@ -763,30 +764,37 @@
   let replayCount = parseInt(localStorage.getItem('birthdayReplayCount')) || 0;
 
   function replayBirthday(isYes) {
-    const modal = document.getElementById('replayModal');
-    modal.classList.remove('active');
+  const modal = document.getElementById('replayModal');
+  modal.classList.remove('active');
+  
+  if (isYes) {
+    replayCount++;
+    localStorage.setItem('birthdayReplayCount', replayCount);
+    birthdayStage = 0;
     
-    if (isYes) {
-      replayCount++;
-localStorage.setItem('birthdayReplayCount', replayCount); // 👈 把次数存进浏览器缓存
-      birthdayStage = 0;
-      document.getElementById('giftBox').classList.remove('opened');
-      document.getElementById('cakeBox').classList.remove('show');
-      document.getElementById('flameGif').style.display = 'none';
-      document.getElementById('darkOverlay').classList.remove('active');
-      document.getElementById('birthdayScroll').classList.remove('active');
-      
-      const hint = document.getElementById('birthdayHint');
-      hint.style.display = 'block';
-      hint.textContent = '点击拆开';
-      
-      if (replayCount >= 3) { document.getElementById('memoryBoxTrigger').style.display = 'block'; }
-    } else {
-      document.getElementById('birthday-dlc').classList.remove('active');
-      document.getElementById('darkOverlay').classList.remove('active');
-    }
+    // 重置礼物盒和蛋糕
+    document.getElementById('giftBox').classList.remove('opened');
+    document.getElementById('cakeBox').classList.remove('show');
+    
+    // 重置蛋糕的切图状态 👇👇👇
+    document.getElementById('wholeCake').style.display = 'block';
+    document.getElementById('cutCake').style.display = 'none';
+    
+    // 重置火苗和黑幕
+    document.getElementById('flameGif').style.display = 'none';
+    document.getElementById('darkOverlay').classList.remove('active');
+    document.getElementById('birthdayScroll').classList.remove('active');
+    
+    const hint = document.getElementById('birthdayHint');
+    hint.style.display = 'block';
+    hint.textContent = '点击拆开';
+    
+    if (replayCount >= 3) { document.getElementById('memoryBoxTrigger').style.display = 'block'; }
+  } else {
+    document.getElementById('birthday-dlc').classList.remove('active');
+    document.getElementById('darkOverlay').classList.remove('active');
   }
-
+}
   function handleBirthdayClick() {
     const hint = document.getElementById('birthdayHint');
     
@@ -826,11 +834,17 @@ localStorage.setItem('birthdayReplayCount', replayCount); // 👈 把次数存�
   hint.style.display = 'block';
   birthdayStage = 3;
 }
-    else if (birthdayStage === 3) {
-      hint.style.display = 'none';
-      document.getElementById('birthdayScroll').classList.add('active');
-      birthdayStage = 4;
-    }
+    // 阶段 3：切蛋糕
+else if (birthdayStage === 3) {
+  hint.style.display = 'none';
+  
+  // 把完整的蛋糕藏起来，把切好的蛋糕亮出来
+  document.getElementById('wholeCake').style.display = 'none';
+  document.getElementById('cutCake').style.display = 'block';
+  
+  document.getElementById('birthdayScroll').classList.add('active');
+  birthdayStage = 4;
+}
   }
  // ====== 忆庭纪念盒逻辑 ======
 let selectedMemoryNode = '';
@@ -860,20 +874,19 @@ function startMemoryReplay() {
 }
  // 退出生日DLC，恢复正常驿站
 function closeBirthdayDLC() {
-  // 把生日主界面隐藏
   document.getElementById('birthday-dlc').classList.remove('active');
-  // 把黑幕也收起来
   document.getElementById('darkOverlay').classList.remove('active');
-  // 把火苗关掉
   document.getElementById('flameGif').style.display = 'none';
   
-  // 重置一下状态，方便下次还能点开
   birthdayStage = 0;
   document.getElementById('giftBox').classList.remove('opened');
   document.getElementById('cakeBox').classList.remove('show');
   document.getElementById('birthdayScroll').classList.remove('active');
   
-  // 把提示字恢复
+  // 退出时，把蛋糕切图也重置 👇👇👇
+  document.getElementById('wholeCake').style.display = 'block';
+  document.getElementById('cutCake').style.display = 'none';
+  
   const hint = document.getElementById('birthdayHint');
   hint.style.display = 'block';
   hint.textContent = '点击拆开';
