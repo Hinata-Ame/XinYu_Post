@@ -402,7 +402,25 @@
       都有光，有风，有不期而遇的温柔<br>
       <span style="color:#a88a63; font-size:12px;">—— 皓月 敬上</span>
     </div>
+    <!-- 忆庭纪念盒入口 -->
+<div id="memoryBoxTrigger" style="display: none; width: 100%; text-align: left; margin-top: 20px; cursor: pointer;">
+  <img src="./assets/birthday3.png" style="width: 70px; filter: drop-shadow(0 0 10px rgba(255,200,120,0.8)); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" onclick="openMemoryList()">
+</div>
+
+<!-- 回忆弹窗列表 -->
+<div id="memoryModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+  <div style="background: rgba(60, 36, 18, 0.95); border: 2px solid #ffd98a; border-radius: 12px; padding: 30px; text-align: center; width: 300px; box-shadow: 0 0 30px rgba(255, 200, 120, 0.3);">
+    <h3 style="color: #ffd98a; margin-top: 0; letter-spacing: 2px;">📜 忆庭回忆录</h3>
+    <p style="color: #d8bf98; font-size: 13px;">请选择要回顾的节点：</p>
     
+    <div onclick="selectNode('2027.01.05')" id="node_2027" style="padding: 10px; margin: 15px 0; background: rgba(139, 90, 43, 0.5); border-radius: 8px; cursor: pointer; color: #fff; transition: background 0.2s;" onmouseover="this.style.background='rgba(139, 90, 43, 0.9)'" onmouseout="this.style.background='rgba(139, 90, 43, 0.5)'">
+      2027.01.05 - 驿站的初雪与生日惊喜
+    </div>
+    
+    <button onclick="startMemoryReplay()" style="margin-top: 20px; padding: 8px 24px; background: #ffd98a; color: #3a2412; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">开启回忆</button>
+    <button onclick="document.getElementById('memoryModal').style.display='none'" style="margin-top: 20px; margin-left: 10px; padding: 8px 24px; background: transparent; color: #d8bf98; border: 1px solid #d8bf98; border-radius: 6px; cursor: pointer;">取消</button>
+  </div>
+</div>
     <div class="letter-box">
       <div class="letter-title">给驿站写一封信</div>
       <textarea id="letterInput" placeholder="想说什么，都可以留在这里……"></textarea>
@@ -434,12 +452,6 @@
       <button onclick="replayBirthday(true)">是</button>
       <button onclick="replayBirthday(false)">否</button>
     </div>
-    <!-- 纪念盒彩蛋 -->
-<div id="memoryBox" style="position: absolute; right: 20px; bottom: 20px; cursor: pointer; display: none; z-index: 1001;">
-    <img src="./assets/birthday3.png" style="width: 60px; filter: drop-shadow(0 0 10px rgba(255,200,120,0.8));">
-    <!-- 加一个绝对定位的点击区域（按钮） -->
-    <button onclick="openMemoryNode()" style="position: absolute; top: 20%; left: 50%; transform: translateX(-50%); background: transparent; border: none; color: #fff; font-size: 12px; cursor: pointer; white-space: nowrap;">2027.01.05</button>
-</div>
   </div>
 
 <script>
@@ -759,7 +771,7 @@ localStorage.setItem('birthdayReplayCount', replayCount); // 👈 把次数存�
       hint.style.display = 'block';
       hint.textContent = '点击拆开';
       
-      if (replayCount >= 3) { document.getElementById('memoryBox').style.display = 'block'; }
+      if (replayCount >= 3) { document.getElementById('memoryBoxTrigger').style.display = 'block'; }
     } else {
       document.getElementById('birthday-dlc').classList.remove('active');
       document.getElementById('darkOverlay').classList.remove('active');
@@ -811,10 +823,31 @@ localStorage.setItem('birthdayReplayCount', replayCount); // 👈 把次数存�
       birthdayStage = 4;
     }
   }
- function openMemoryNode() {
-  if (confirm("是否打开 2027.01.05 的专属回忆？")) {
-    replayBirthday(true);
-  }
+ // ====== 忆庭纪念盒逻辑 ======
+let selectedMemoryNode = '';
+
+function openMemoryList() {
+  document.getElementById('memoryModal').style.display = 'flex';
+  selectNode('2027.01.05'); // 默认选中
+}
+
+function selectNode(nodeName) {
+  selectedMemoryNode = nodeName;
+  document.getElementById('node_2027').style.border = '2px solid #ffd98a';
+  document.getElementById('node_2027').style.background = 'rgba(139, 90, 43, 0.9)';
+}
+
+function startMemoryReplay() {
+  if (!selectedMemoryNode) return;
+  
+  // 关掉弹窗
+  document.getElementById('memoryModal').style.display = 'none';
+  
+  // 强制亮出 DLC 界面
+  document.getElementById('birthday-dlc').classList.add('active');
+  
+  // 强行把重置和拆礼物流程走一遍
+  replayBirthday(true); 
 }
 </script>
 </body>
