@@ -365,6 +365,26 @@
   @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
   
   .birthday-scroll-text { position: absolute; bottom: 40px; width: 100%; text-align: center; font-size: 16px; color: #ffe9c4; letter-spacing: 2px; display: none; }
+  @keyframes blowFloat {
+  0% { 
+    transform: translateY(0); 
+    opacity: 0.3; 
+    text-shadow: 0 0 5px rgba(255,255,255,0.2);
+  }
+  50% { 
+    transform: translateY(-10px); 
+    opacity: 0.9; 
+    text-shadow: 0 0 15px rgba(255,255,255,0.8);
+  }
+  100% { 
+    transform: translateY(0); 
+    opacity: 0.3; 
+    text-shadow: 0 0 5px rgba(255,255,255,0.2);
+  }
+}
+.blow-hint-active {
+  animation: blowFloat 3s ease-in-out infinite;
+}
   .birthday-scroll-text.active { display: block; animation: scrollUp 2s ease forwards; }
   @keyframes scrollUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   
@@ -443,6 +463,8 @@
   <img src="./assets/birthday5.png" id="cutCake" alt="切好的蛋糕" style="display: none;">
   <img src="./assets/birthday2.gif" class="flame-gif" id="flameGif" alt="火苗">
 </div>
+     <!-- 吹蜡烛提示字 -->
+<div id="blowHint" style="display: none; position: absolute; top: 30%; left: 65%; color: rgba(255, 255, 255, 0.7); font-size: 20px; font-weight: bold; pointer-events: none; letter-spacing: 4px; z-index: 20;">吹</div>
     </div>
     <div class="birthday-hint" id="birthdayHint">点击拆开</div>
     <div class="birthday-scroll-text" id="birthdayScroll">
@@ -804,11 +826,14 @@
       setTimeout(() => { hint.textContent = '点蜡烛许愿'; birthdayStage = 1; }, 800);
     } 
     else if (birthdayStage === 1) {
-  // 亮起火苗（不需要 const flame 了，直接用 id 找）
-  document.getElementById('flameGif').style.display = 'block';
+  const flame = document.getElementById('flameGif');
+  flame.style.display = 'block';
   
-  // 黑屏
   document.getElementById('darkOverlay').classList.add('active');
+  
+  const blow = document.getElementById('blowHint');
+  blow.style.display = 'block';
+  blow.classList.add('blow-hint-active');
   
   hint.style.display = 'none'; 
   birthdayStage = 2;
@@ -820,11 +845,14 @@
     else if (birthdayStage === 2) {
   clearTimeout(birthdayTimer);
   
-  // 灭掉火苗
-  document.getElementById('flameGif').style.display = 'none'; 
+  const flame = document.getElementById('flameGif');
+  flame.style.display = 'none'; 
   
-  // 亮屏
   document.getElementById('darkOverlay').classList.remove('active');
+  
+  const blow = document.getElementById('blowHint');
+  blow.style.display = 'none';
+  blow.classList.remove('blow-hint-active');
   
   const b = document.getElementById('bubble');
   b.style.opacity = 1; 
