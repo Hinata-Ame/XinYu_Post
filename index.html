@@ -633,15 +633,20 @@
   }
 
   window.addEventListener("load", () => {
-    initSupabase();
-    showLastGap();
-    recordEnter();
+  initSupabase();
+  showLastGap();
+  recordEnter();
 
-    if (isBirthdayOpen === 1) {
-      document.getElementById('birthday-dlc').classList.add('active');
-      document.getElementById('replayModal').classList.add('active'); 
-    }
-  });
+  if (isBirthdayOpen === 1) {
+    document.getElementById('birthday-dlc').classList.add('active');
+    document.getElementById('replayModal').classList.add('active'); 
+  }
+
+  // 👇 新增：每次刷新或进入页面，检查缓存里的次数，如果 >= 3，就把纪念盒亮出来！
+  if (replayCount >= 3) {
+    document.getElementById('memoryBoxTrigger').style.display = 'block';
+  }
+});
   window.addEventListener("beforeunload", recordLeave);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") recordLeave();
