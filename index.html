@@ -452,6 +452,10 @@
       <button onclick="replayBirthday(true)">是</button>
       <button onclick="replayBirthday(false)">否</button>
     </div>
+   <!-- 左上角返回按钮 -->
+<div id="birthdayBackBtn" style="position: absolute; top: 20px; left: 20px; color: #a88a63; font-size: 24px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; z-index: 1005;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" onclick="closeBirthdayDLC()">
+  ✕
+</div>
   </div>
 
 <script>
@@ -853,6 +857,26 @@ function startMemoryReplay() {
   
   // 强行把重置和拆礼物流程走一遍
   replayBirthday(true); 
+}
+ // 退出生日DLC，恢复正常驿站
+function closeBirthdayDLC() {
+  // 把生日主界面隐藏
+  document.getElementById('birthday-dlc').classList.remove('active');
+  // 把黑幕也收起来
+  document.getElementById('darkOverlay').classList.remove('active');
+  // 把火苗关掉
+  document.getElementById('flameGif').style.display = 'none';
+  
+  // 重置一下状态，方便下次还能点开
+  birthdayStage = 0;
+  document.getElementById('giftBox').classList.remove('opened');
+  document.getElementById('cakeBox').classList.remove('show');
+  document.getElementById('birthdayScroll').classList.remove('active');
+  
+  // 把提示字恢复
+  const hint = document.getElementById('birthdayHint');
+  hint.style.display = 'block';
+  hint.textContent = '点击拆开';
 }
 </script>
 </body>
