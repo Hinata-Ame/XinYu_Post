@@ -434,9 +434,12 @@
       <button onclick="replayBirthday(true)">是</button>
       <button onclick="replayBirthday(false)">否</button>
     </div>
-    <div id="memoryBox" style="position: absolute; right: 20px; bottom: 20px; cursor: pointer; display: none;" onclick="alert('忆庭纪念盒已开启！2027.01.05 节点已记录。')">
-        <img src="./assets/birthday3.png" style="width: 60px; filter: drop-shadow(0 0 10px rgba(255,200,120,0.8));">
-    </div>
+    <!-- 纪念盒彩蛋 -->
+<div id="memoryBox" style="position: absolute; right: 20px; bottom: 20px; cursor: pointer; display: none; z-index: 1001;">
+    <img src="./assets/birthday3.png" style="width: 60px; filter: drop-shadow(0 0 10px rgba(255,200,120,0.8));">
+    <!-- 加一个绝对定位的点击区域（按钮） -->
+    <button onclick="openMemoryNode()" style="position: absolute; top: 20%; left: 50%; transform: translateX(-50%); background: transparent; border: none; color: #fff; font-size: 12px; cursor: pointer; white-space: nowrap;">2027.01.05</button>
+</div>
   </div>
 
 <script>
@@ -808,6 +811,11 @@ localStorage.setItem('birthdayReplayCount', replayCount); // 👈 把次数存�
       birthdayStage = 4;
     }
   }
+ function openMemoryNode() {
+  if (confirm("是否打开 2027.01.05 的专属回忆？")) {
+    replayBirthday(true);
+  }
+}
 </script>
 </body>
 </html>
