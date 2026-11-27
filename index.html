@@ -593,9 +593,19 @@
   }
 
   async function recordEnter() {
-    if (!db) return;
-    try { await db.from("visits").insert({ visitor: VISITOR, entered_at: new Date().toISOString() }); } catch (e) {}
-  }
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/visits`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ visitor: VISITOR, entered_at: new Date().toISOString() })
+    });
+  } catch (e) { console.error("访问记录失败", e); }
+}
   async function recordLeave() {
     if (!db) return;
     try {
@@ -744,26 +754,36 @@
   }
 
   async function sendLetter() {
-    const input = document.getElementById('letterInput');
-    const msg = document.getElementById('letterMsg');
-    const text = input.value.trim();
-    if (!text) { msg.textContent = '咋是空的？是想送个飞吻嘛？（开玩笑辣）'; return; }
-    
-    if (!db) { 
-      initSupabase();
-      if (!db) { msg.textContent = '驿站还没连上电呢，再等等叭'; return; }
-    }
+  const input = document.getElementById('letterInput');
+  const msg = document.getElementById('letterMsg');
+  const text = input.value.trim();
+  if (!text) { msg.textContent = '咋是空的？是想送个飞吻嘛？（开玩笑辣）'; return; }
+  
+  msg.textContent = '正在寄信...';
+  
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/letters`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ content: text })
+    });
 
-    msg.textContent = '正在寄信...';
-    try {
-      const { data, error } = await db.from("letters").insert([{ content: text }]);
-      if (error) throw error;
+    if (response.ok) {
       input.value = '';
       msg.textContent = 'wow很有用的信！已经放好啦！下次再来哦哟！';
-    } catch (e) { 
-      msg.textContent = '对不起，信没保护好，再来一次吧'; 
+    } else {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+  } catch (e) { 
+    console.error("寄信错误:", e);
+    msg.textContent = '对不起，信没保护好，再来一次吧（错误：' + e.message + '）'; 
   }
+}
 
   let birthdayStage = 0; 
   let birthdayTimer = null;
