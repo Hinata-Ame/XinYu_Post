@@ -652,11 +652,20 @@
     } catch (e) {}
   }
   function initSupabase() {
-    try {
-      if (!SUPABASE_URL.startsWith("http")) return;
-      if (!window.supabase) return;
-      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    } catch (e) { db = null; }
+  try {
+    if (!SUPABASE_URL.startsWith("http")) return;
+    if (!window.supabase) {
+      console.warn("Supabase SDK 还没加载好，稍后重试...");
+      setTimeout(initSupabase, 1000); // 👈 如果手机网慢没加载出来，1秒后重试
+      return;
+    }
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log("驿站成功连上电啦！");
+  } catch (e) { 
+    console.error("连接失败:", e);
+    db = null; 
+  }
+}
   }
 
   window.addEventListener("load", () => {
@@ -767,17 +776,35 @@
   }
 
   async function sendLetter() {
-    const input = document.getElementById('letterInput');
-    const msg = document.getElementById('letterMsg');
-    const text = input.value.trim();
-    if (!text) { msg.textContent = '咋是空的？是想送个飞吻嘛？（开玩笑辣）'; return; }
-    if (!db) { msg.textContent = '驿站还没连上电呢，再等等叭'; return; }
-    try {
-      await db.from("letters").insert({ content: text });
-      input.value = '';
-      msg.textContent = 'wow很有用的信！已经放好啦！下次再来哦哟！';
-    } catch (e) { msg.textContent = '对不起，信没保护好，再来一次吧'; }
+  const input = document.getElementById('letterInput');
+  const msg = document.getElementById('letterMsg');
+  const text = input.value.trim();
+  if (!text) { msg.textContent = '咋是空的？是想送个飞吻嘛？（开玩笑辣）'; return; }
+  
+  // 如果 db 还没准备好，强行再初始化一次
+  if (!db) { 
+    initSupabase();
+    if (!db) {
+      msg.textContent = '驿站还没连上电呢，再等等叭'; 
+      return; 
+    }
   }
+
+  msg.textContent = '正在寄信...';
+  
+  try {
+    // 👈 加上 .then() 和 .catch() 确保请求在手机端能跑通
+    const { data, error } = await db.from("letters").insert([{ content: text }]);
+    
+    if (error) throw error;
+
+    input.value = '';
+    msg.textContent = 'wow很有用的信！已经放好啦！下次再来哦哟！';
+  } catch (e) { 
+    console.error("寄信失败:", e);
+    msg.textContent = '对不起，信没保护好，再来一次吧'; 
+  }
+}
 
   // ================= 生日 DLC 逻辑 =================
   let birthdayStage = 0; 
