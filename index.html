@@ -1,674 +1,188 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>欣雨大人的专属驿站</title>
-<link rel="icon" type="image/png" href="./assets/favicon.png">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-    color: #f4ecdf;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 16px 80px;
-    overflow-x: hidden;
-    background: url('./assets/inn-bg.jpg') center/cover no-repeat fixed, #2a1c12;
-  }
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: linear-gradient(rgba(40,25,12,0.55), rgba(20,12,6,0.8));
-    pointer-events: none;
-    z-index: 0;
-  }
-  .wrap {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 460px;
-  }
-  h1 {
-    font-size: 22px;
-    letter-spacing: 4px;
-    color: #ffe9c4;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 18px rgba(255,190,120,0.6);
-    margin-bottom: 4px;
-    text-align: center;
-  }
-  .sub {
-    font-size: 12px;
-    color: #d8bf98;
-    margin-bottom: 26px;
-    letter-spacing: 2px;
-  }
-  .signboard {
-    position: relative;
-    width: 100%;
-    background: linear-gradient(#8b5a2b, #6f431d);
-    border: 4px solid #4a2c11;
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin-bottom: 26px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.35);
-    text-align: center;
-  }
-  .signboard::before, .signboard::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 6px; height: 14px;
-    background: #4a2c11;
-  }
-  .signboard::before { top: -14px; }
-  .signboard::after { bottom: -14px; }
-  .signboard .pin {
-    position: absolute;
-    top: 8px; left: 14px;
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: #d94a4a;
-    box-shadow: 0 0 6px rgba(0,0,0,0.5);
-  }
-  .signboard p {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.8;
-    color: #fff4e0;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-  }
-  .signboard .title {
-    font-size: 15px;
-    letter-spacing: 2px;
-    color: #ffd98a;
-    margin-bottom: 6px;
-  }
-  .station {
-    position: relative;
-    width: 100%;
-    min-height: 340px;
-    border-radius: 18px;
-    border: 1px solid rgba(255,200,140,0.35);
-    background: rgba(40,24,12,0.45);
-    box-shadow: inset 0 0 50px rgba(255,170,80,0.15), 0 10px 30px rgba(0,0,0,0.6);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 24px 18px 30px;
-    overflow: hidden;
-  }
-  .lamp {
-    position: absolute;
-    top: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 120px; height: 120px;
-    background: radial-gradient(circle, rgba(255,190,110,0.55) 0%, rgba(255,180,90,0) 70%);
-    pointer-events: none;
-  }
-  .characters {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 36px;
-    margin-bottom: 22px;
-  }
-  .char {
-    position: relative;
-    cursor: pointer;
-    transition: transform 0.15s ease;
-    filter: drop-shadow(0 0 14px rgba(255,200,120,0.6));
-    user-select: none;
-    animation: idleSway 3.5s ease-in-out infinite;
-    transform-origin: bottom center;
-  }
-  .char:nth-child(2) { animation-duration: 4.2s; }
-  .char:active { transform: scale(0.94); }
-  .char img {
-    width: 108px;
-    height: auto;
-    display: block;
-    pointer-events: none;
-    transition: transform 0.1s;
-  }
-  .char.hornet img { width: 98px; }
-  @keyframes idleSway {
-    0%   { transform: rotate(-1.2deg) translateY(0); }
-    50%  { transform: rotate(1.2deg) translateY(-8px); }
-    100% { transform: rotate(-1.2deg) translateY(0); }
-  }
-  .char.jump { animation: jumpOnce 0.5s ease; }
-  @keyframes jumpOnce {
-    0%   { transform: translateY(0) scale(1); }
-    30%  { transform: translateY(-30px) scale(1.05); }
-    60%  { transform: translateY(0) scale(0.98); }
-    100% { transform: translateY(0) scale(1); }
-  }
-  .bubble {
-    max-width: 330px;
-    min-height: 58px;
-    background: rgba(255,244,224,0.96);
-    color: #3a2412;
-    padding: 14px 18px;
-    border-radius: 16px;
-    font-size: 14px;
-    line-height: 1.7;
-    position: relative;
-    text-align: center;
-    transition: opacity 0.25s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-  }
-  .bubble::after {
-    content: "";
-    position: absolute;
-    top: -8px; left: 50%;
-    transform: translateX(-50%);
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid rgba(255,244,224,0.96);
-  }
-  .hint {
-    margin-top: 18px;
-    font-size: 12px;
-    color: #c9ab84;
-    letter-spacing: 2px;
-  }
-  .music-btn {
-    position: fixed;
-    right: 16px;
-    top: 16px;
-    z-index: 5;
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,210,150,0.6);
-    background: rgba(60,36,18,0.7);
-    color: #ffd98a;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  }
-  .music-btn:active { transform: scale(0.9); }
-  .music-btn.playing { animation: spin 3s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .blessing {
-    margin-top: 34px;
-    font-size: 13px;
-    color: #d8bf98;
-    text-align: center;
-    line-height: 2;
-    letter-spacing: 1px;
-  }
-  .blessing .name {
-    color: #ffb3c8;
-    text-shadow: 0 0 10px rgba(255,150,190,0.6);
-  }
-  .firefly {
-    position: fixed;
-    width: 4px; height: 4px;
-    border-radius: 50%;
-    background: #ffd98a;
-    box-shadow: 0 0 8px 2px rgba(255,200,120,0.9);
-    pointer-events: none;
-    animation: float linear infinite;
-    opacity: 0.7;
-    z-index: 1;
-  }
-  @keyframes float {
-    0% { transform: translateY(0); opacity: 0; }
-    10% { opacity: 0.8; }
-    50% { transform: translateY(-40vh) translateX(20px); }
-    90% { opacity: 0.6; }
-    100% { transform: translateY(-80vh) translateX(-20px); opacity: 0; }
-  }
-  .ori {
-    position: fixed;
-    right: 18px;
-    bottom: 18px;
-    width: 90px;
-    height: auto;
-    z-index: 4;
-    filter: drop-shadow(0 0 12px rgba(120,220,255,0.7));
-    animation: oriFloat 4s ease-in-out infinite;
-    pointer-events: none;
-  }
-  @keyframes oriFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-  }
-  .char.fighting {
-    filter: drop-shadow(0 0 18px rgba(255,90,90,0.9));
-    z-index: 6;
-  }
-  .char.fighting img {
-    width: 180px;
-    transform: scale(2.2);
-    transform-origin: bottom center;
-  }
-  .char.music img {
-    width: 80px;
-    transform: scale(0.4);
-    transform-origin: bottom center;
-  }
-  .bili-entry {
-    position: fixed;
-    left: 18px;
-    bottom: 18px;
-    z-index: 5;
-    display: block;
-    width: 80px;
-    height: 80px;
-    overflow: hidden;
-    animation: biliSway 3.6s ease-in-out infinite;
-    transform-origin: bottom center;
-    filter: drop-shadow(0 0 10px rgba(255,150,190,0.7));
-  }
-  .bili-entry img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
-  }
-  .letter-box {
-    width: 100%;
-    margin-top: 28px;
-    background: rgba(40,24,12,0.6);
-    border: 1px solid rgba(255,200,140,0.35);
-    border-radius: 16px;
-    padding: 18px;
-    box-shadow: inset 0 0 30px rgba(255,170,80,0.12);
-  }
-  .letter-title {
-    font-size: 14px;
-    color: #ffd98a;
-    letter-spacing: 2px;
-    margin-bottom: 12px;
-  }
-  .letter-box textarea {
-    width: 100%;
-    min-height: 90px;
-    resize: vertical;
-    background: rgba(20,12,6,0.7);
-    border: 1px solid rgba(255,200,140,0.3);
-    border-radius: 10px;
-    color: #fff4e0;
-    padding: 10px;
-    font-size: 14px;
-    font-family: inherit;
-    outline: none;
-  }
-  .letter-box textarea:focus {
-    border-color: rgba(255,210,150,0.7);
-  }
-  #letterSend {
-    margin-top: 12px;
-    padding: 8px 20px;
-    background: #8b5a2b;
-    border: 1px solid #4a2c11;
-    border-radius: 10px;
-    color: #ffe9c4;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  #letterSend:active { transform: scale(0.96); }
-  .letter-msg {
-    margin-top: 10px;
-    font-size: 13px;
-    color: #ffd98a;
-    min-height: 18px;
-  }
+const SUPABASE_URL = "https://jnwxccfzaoxjxwcemgjq.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impud3hjY2Z6YW94anh3Y2VtZ2pxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MjA3NDEsImV4cCI6MjEwNTI5Njc0MX0.U5xDZYrSpcqev05SeXXd8KeoEiMyVtAKoDZ7nu0BuQ8"
+const VISITOR = new URLSearchParams(location.search).get("me") === "1" ? "test" : "xinyu";
 
-  /* ====== 生日 DLC 样式 ====== */
-  #birthday-dlc {
-    position: fixed; inset: 0; z-index: 999; display: none; 
-    background: transparent; /* 👈 绝不黑屏 */
-    backdrop-filter: none; /* 👈 绝不模糊 */
-    align-items: center; justify-content: center; flex-direction: column;
-  }
-  #birthday-dlc.active { display: flex; }
-  
-  .dark-overlay {
-    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
-    z-index: 998; display: none; opacity: 0; pointer-events: none; transition: opacity 1s ease;
-  }
-  .dark-overlay.active { display: block; opacity: 1; }
-  
-  .gift-container { position: relative; width: 260px; height: 260px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-  .gift-box { position: absolute; width: 180px; height: 180px; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-  .gift-box.opened { opacity: 0; transform: scale(0.8) translateY(50px); pointer-events: none; }
-  .gift-box img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-  
-  .cake-box { position: absolute; width: 220px; height: 220px; opacity: 0; transform: scale(0.5) translateY(100px); transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; display: flex; align-items: center; justify-content: center; }
-  .cake-box.show { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
-  .cake-box img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-  
-  /* 火苗样式，调整了 top 和 left 让它在蜡烛上 */
-  .flame-gif { position: absolute; top: -35%; left: 52%; transform: translateX(-50%) scale(0.1); width: 100%; height: auto; display: none; pointer-events: none; filter: drop-shadow(0 0 8px rgba(255, 180, 50, 0.8)); z-index: 10;trainsform-origin: center botton;}
-  .flame-gif.active { display: block; }
+// ================= 生日 DLC 核心开关 =================
+const isBirthdayOpen = 0; // 1月5日开启用 1，平时用 0
 
-  .birthday-hint { margin-top: 30px; font-size: 18px; color: #ffd98a; text-shadow: 0 0 10px rgba(255, 200, 120, 0.8); text-align: center; animation: pulse 1.5s infinite; transition: opacity 0.3s; }
-  @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
-  
-  .birthday-scroll-text { position: absolute; bottom: 40px; width: 100%; text-align: center; font-size: 16px; color: #ffe9c4; letter-spacing: 2px; display: none; }
-  @keyframes blowFloat {
-  0% { 
-    transform: translateY(0); 
-    opacity: 0.3; 
-    text-shadow: 0 0 5px rgba(255,255,255,0.2);
-  }
-  50% { 
-    transform: translateY(-10px); 
-    opacity: 0.9; 
-    text-shadow: 0 0 15px rgba(255,255,255,0.8);
-  }
-  100% { 
-    transform: translateY(0); 
-    opacity: 0.3; 
-    text-shadow: 0 0 5px rgba(255,255,255,0.2);
-  }
-}
-.blow-hint-active {
-  animation: blowFloat 3s ease-in-out infinite;
-}
-  .birthday-scroll-text.active { display: block; animation: scrollUp 2s ease forwards; }
-  @keyframes scrollUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  
-  .birthday-replay-modal { position: absolute; top: 20%; background: rgba(60, 36, 18, 0.95); border: 2px solid #ffd98a; border-radius: 12px; padding: 20px; text-align: center; z-index: 1000; display: none; }
-  .birthday-replay-modal.active { display: block; }
-  .birthday-replay-modal button { margin: 10px; padding: 6px 16px; background: #8b5a2b; border: 1px solid #4a2c11; color: #fff; border-radius: 8px; cursor: pointer; }
-</style>
-</head>
-<body>
-  <button class="music-btn" id="musicBtn" onclick="toggleMusic()" ondblclick="nextTrack()">♪</button>
-  
-  <div class="wrap">
-    <h1>欣雨大人的专属驿站</h1>
-    <div class="sub">— 累了就进来歇一会儿 —</div>
-    <div class="signboard">
-      <div class="pin"></div>
-      <div class="title">今日公告</div>
-      <p>欣雨大人！这一天真是辛苦啦！<br>快来这歇息一下叭，有啥烦恼的话也可以寄信来这儿，我一直都在！</p>
-      <a href="https://www.bilibili.com" target="_blank" class="bili-entry"><img src="./assets/bilibili.png" alt="B站"></a>
-    </div>
-    
-    <div class="station">
-      <div class="lamp"></div>
-      <img src="./assets/ori.png" alt="奥日" class="ori">
-      <div class="characters">
-        <div class="char knight" data-normal="./assets/knight.png" data-fight="./assets/knight_fight.png" onclick="talk('knight', this)"><img src="./assets/knight.png" alt="小骑士"></div>
-        <div class="char hornet" data-normal="./assets/hornet.png" data-fight="./assets/hornet_fight.png" data-music="./assets/hornet_music.png"><img src="./assets/hornet.png" alt="黄蜂女"></div>
-      </div>
-      <div class="bubble" id="bubble">轻触他们，听听他们会说什么 ✦</div>
-    </div>
-    
-    <div class="hint">点一下小骑士，点一下黄蜂女（长按惊喜），双击右上角切歌</div>
-    <div class="blessing">
-      愿 <span class="name">雾笙</span> 的每一天<br>
-      都有光，有风，有不期而遇的温柔<br>
-      <span style="color:#a88a63; font-size:12px;">—— 皓月 敬上</span>
-    </div>
-    <!-- 忆庭纪念盒入口 -->
-<div id="memoryBoxTrigger" style="display: none; width: 100%; text-align: left; margin-top: 20px; cursor: pointer;">
-  <img src="./assets/birthday3.png" style="width: 70px; filter: drop-shadow(0 0 10px rgba(255,200,120,0.8)); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" onclick="openMemoryList()">
-</div>
+const knightLines = [
+  "今天也辛苦了，欢迎回到驿站",
+  "这里没有被感染，可以好好放松一下",
+  "可以什么都不做，只是待着，也很好",
+  "明天的事，交给明天的你吧，今天剩下的我会砍掉它",
+  "驿站永远为你亮着灯",
+  "晚安，欣雨大人"
+];
+const hornetLinesOld = [
+  "嘎啦嘛！", "嘎啦嘛！累的时候就别硬撑了", "嘎啦嘛！早八什么的，砍了它",
+  "嘎啦嘛！你已经很厉害了", "嘎啦嘛！别忘了笑一笑"
+];
+const hornetLinesNew = [
+  "又见面了，欣雨阁下", "今天的你也很帅！", "圣巢会庇佑你", "是个很坚强的虫虫呢",
+  "早八很危险，挺起胸膛，勇士", "不需要表现得很好，不管怎么样，我都很敬佩你",
+  "要哭会儿吗？这儿很安静", "我曾守望过一个将死的国度，同样的角色我不想再扮第二次，你也是，加油",
+  "六人间也能睡出好梦", "我意已决，不能就这样离开。必须重返地底（不能离开你），解放纺络（解开你的结）",
+  "谁让你难过，我替你扎他。", "明天的事，明天再说。", "记得抬头看看天。",
+  "鲜少有虫如你这般，俏丽的异乡猎手", "你说皓日？我当然认识，他比你想象的要更加挺拔，忠诚",
+  "他叫我来守护你，嘴里呢喃着什么不能让你一个人忍受这些", "今天走了那么久，到这里坐会儿吧",
+  "站了一天了，辛苦了", "接下来想做什么？", "不觉得这地方少了一点什么吗？要去和他提下意见吗？",
+  "嗯，我在这儿，灯也亮着", "你真的很厉害，能走到这里，听会儿音乐，放松一下吧",
+  "别急，先喘口气。", "他（皓日）真的每天都来问我你最近咋样，确实烦，要我去把他赶走吗？",
+  "你已经做得够好了，我这有多余的灵丝，给你回口血吧", "我的丝线原本只能坚持这么久，但是他却...所以我才能站在这，守护你，他让我给你带句话：我会守护你的",
+  "别把自己逼太紧了，休息会儿", "喝口蜜露，再继续", "有空就回来坐坐",
+  "你开心，我就开心，他也会开心的", "晚安，欣雨大人"
+];
 
-<!-- 回忆弹窗列表 -->
-<div id="memoryModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
-  <div style="background: rgba(60, 36, 18, 0.95); border: 2px solid #ffd98a; border-radius: 12px; padding: 30px; text-align: center; width: 300px; box-shadow: 0 0 30px rgba(255, 200, 120, 0.3);">
-    <h3 style="color: #ffd98a; margin-top: 0; letter-spacing: 2px;">📜 忆庭回忆录</h3>
-    <p style="color: #d8bf98; font-size: 13px;">请选择要回顾的节点：</p>
-    
-    <div onclick="selectNode('2027.01.05')" id="node_2027" style="padding: 10px; margin: 15px 0; background: rgba(139, 90, 43, 0.5); border-radius: 8px; cursor: pointer; color: #fff; transition: background 0.2s;" onmouseover="this.style.background='rgba(139, 90, 43, 0.9)'" onmouseout="this.style.background='rgba(139, 90, 43, 0.5)'">
-      2027.01.05 - 驿站的初雪与生日惊喜
-    </div>
-    
-    <button onclick="startMemoryReplay()" style="margin-top: 20px; padding: 8px 24px; background: #ffd98a; color: #3a2412; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">开启回忆</button>
-    <button onclick="document.getElementById('memoryModal').style.display='none'" style="margin-top: 20px; margin-left: 10px; padding: 8px 24px; background: transparent; color: #d8bf98; border: 1px solid #d8bf98; border-radius: 6px; cursor: pointer;">取消</button>
-  </div>
-</div>
-    <div class="letter-box">
-      <div class="letter-title">给驿站写一封信</div>
-      <textarea id="letterInput" placeholder="想说什么，都可以留在这里……"></textarea>
-      <button id="letterSend" onclick="sendLetter()">寄出</button>
-      <div id="letterMsg" class="letter-msg"></div>
-    </div>
-  </div>
+const hornetSoundsOld = ["./assets/hornet1.mp3", "./assets/hornet2.mp3", "./assets/hornet3.mp3", "./assets/hornet4.mp3", "./assets/hornet5.mp3", "./assets/hornet6.mp3", "./assets/hornet7.mp3"];
+const hornetSoundsNew = [];
+for (let i = 8; i <= 38; i++) { hornetSoundsNew.push("./assets/hornet" + i + ".mp3"); }
+const playlist = ["./assets/bgm1.mp3", "./assets/bgm2.mp3", "./assets/bgm3.mp3"];
 
-  <audio id="bgm" loop></audio>
+let currentTrack = 0;
+let playing = false;
+let lastOldSound = -1;
+let lastNewSound = -1;
+const bgm = document.getElementById('bgm');
+const btn = document.getElementById('musicBtn');
+let db = null;
 
-  <!-- ====== 生日 DLC 界面 ====== -->
-  <div class="dark-overlay" id="darkOverlay"></div>
-  <div id="birthday-dlc">
-    <div class="gift-container" id="giftContainer" onclick="handleBirthdayClick()">
-      <div class="gift-box" id="giftBox">
-        <img src="./assets/birthday1.png" alt="礼物盒">
-      </div>
-      <div class="cake-box" id="cakeBox">
-  <img src="./assets/birthday4.png" id="wholeCake" alt="蛋糕">
-  <img src="./assets/birthday5.png" id="cutCake" alt="切好的蛋糕" style="display: none;">
-  <img src="./assets/birthday2.gif" class="flame-gif" id="flameGif" alt="火苗">
-</div>
-     <!-- 吹蜡烛提示字 -->
-<div id="blowHint" style="display: none; position: absolute; top: 25%; left: 80%; color: rgba(255, 255, 255, 0.7); font-size: 20px; font-weight: bold; pointer-events: none; letter-spacing: 4px; z-index: 20;">吹</div>
-    </div>
-    <div class="birthday-hint" id="birthdayHint">点击拆开</div>
-    <div class="birthday-scroll-text" id="birthdayScroll">
-      又是一年，祝学姐永远开开心心快快乐乐，永不掉档，嘿嘿
-    </div>
-    <div class="birthday-replay-modal" id="replayModal">
-      <p>是否想重新体验？</p>
-      <button onclick="replayBirthday(true)">是</button>
-      <button onclick="replayBirthday(false)">否</button>
-    </div>
-   <!-- 左上角返回按钮 -->
-<div id="birthdayBackBtn" style="position: absolute; top: 20px; left: 20px; color: #a88a63; font-size: 24px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; z-index: 1005;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" onclick="closeBirthdayDLC()">
-  ✕
-</div>
-  </div>
+function talk(who, el) {
+  const b = document.getElementById('bubble');
+  let line;
 
-<script>
-  const SUPABASE_URL = "https://jnwxccfzaoxjxwcemgjq.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impud3hjY2Z6YW94anh3Y2VtZ2pxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MjA3NDEsImV4cCI6MjEwNTI5Njc0MX0.U5xDZYrSpcqev05SeXXd8KeoEiMyVtAKoDZ7nu0BuQ8"
-  const VISITOR = new URLSearchParams(location.search).get("me") === "1" ? "test" : "xinyu";
-
-  // ================= 生日 DLC 核心开关 =================
-  const isBirthdayOpen = 0; // 1月5日开启用 1，平时用 0
-
-  const knightLines = [
-    "今天也辛苦了，欢迎回到驿站",
-    "这里没有被感染，可以好好放松一下",
-    "可以什么都不做，只是待着，也很好",
-    "明天的事，交给明天的你吧，今天剩下的我会砍掉它",
-    "驿站永远为你亮着灯",
-    "晚安，欣雨大人"
-  ];
-  const hornetLinesOld = [
-    "嘎啦嘛！", "嘎啦嘛！累的时候就别硬撑了", "嘎啦嘛！早八什么的，砍了它",
-    "嘎啦嘛！你已经很厉害了", "嘎啦嘛！别忘了笑一笑"
-  ];
-  const hornetLinesNew = [
-    "又见面了，欣雨阁下", "今天的你也很帅！", "圣巢会庇佑你", "是个很坚强的虫虫呢",
-    "早八很危险，挺起胸膛，勇士", "不需要表现得很好，不管怎么样，我都很敬佩你",
-    "要哭会儿吗？这儿很安静", "我曾守望过一个将死的国度，同样的角色我不想再扮第二次，你也是，加油",
-    "六人间也能睡出好梦", "我意已决，不能就这样离开。必须重返地底（不能离开你），解放纺络（解开你的结）",
-    "谁让你难过，我替你扎他。", "明天的事，明天再说。", "记得抬头看看天。",
-    "鲜少有虫如你这般，俏丽的异乡猎手", "你说皓日？我当然认识，他比你想象的要更加挺拔，忠诚",
-    "他叫我来守护你，嘴里呢喃着什么不能让你一个人忍受这些", "今天走了那么久，到这里坐会儿吧",
-    "站了一天了，辛苦了", "接下来想做什么？", "不觉得这地方少了一点什么吗？要去和他提下意见吗？",
-    "嗯，我在这儿，灯也亮着", "你真的很厉害，能走到这里，听会儿音乐，放松一下吧",
-    "别急，先喘口气。", "他（皓日）真的每天都来问我你最近咋样，确实烦，要我去把他赶走吗？",
-    "你已经做得够好了，我这有多余的灵丝，给你回口血吧", "我的丝线原本只能坚持这么久，但是他却...所以我才能站在这，守护你，他让我给你带句话：我会守护你的",
-    "别把自己逼太紧了，休息会儿", "喝口蜜露，再继续", "有空就回来坐坐",
-    "你开心，我就开心，他也会开心的", "晚安，欣雨大人"
-  ];
-
-  const hornetSoundsOld = ["./assets/hornet1.mp3", "./assets/hornet2.mp3", "./assets/hornet3.mp3", "./assets/hornet4.mp3", "./assets/hornet5.mp3", "./assets/hornet6.mp3", "./assets/hornet7.mp3"];
-  const hornetSoundsNew = [];
-  for (let i = 8; i <= 38; i++) { hornetSoundsNew.push("./assets/hornet" + i + ".mp3"); }
-  const playlist = ["./assets/bgm1.mp3", "./assets/bgm2.mp3", "./assets/bgm3.mp3"];
-  
-  let currentTrack = 0;
-  let playing = false;
-  let lastOldSound = -1;
-  let lastNewSound = -1;
-  const bgm = document.getElementById('bgm');
-  const btn = document.getElementById('musicBtn');
-  let db = null;
-
-  function talk(who, el) {
-    const b = document.getElementById('bubble');
-    let line;
-
-    if (isBirthdayOpen === 1) {
-      const birthdayLines = [
-        "生日快乐！欣雨大人！",
-        "祝学姐年年岁岁，永不掉档！",
-        "今天是你的专属节日！",
-        "接下来的每一天都要开心！",
-        "生日快乐！🎉"
-      ];
-      line = birthdayLines[Math.floor(Math.random() * birthdayLines.length)];
-      if (who === 'hornet') { playHornetSound(true); } else { playKnightSound(); }
-      b.style.opacity = 0;
-      setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
-      if (el && !el.classList.contains('jump')) {
-        el.classList.add('jump');
-        setTimeout(() => el.classList.remove('jump'), 520);
-      }
-      return; 
-    }
-
-    if (who === 'hornet') {
-      const useOld = Math.random() < 0.5;
-      const pool = useOld ? hornetLinesOld : hornetLinesNew;
-      line = pool[Math.floor(Math.random() * pool.length)];
-      playHornetSound(useOld);
-    } else {
-      line = knightLines[Math.floor(Math.random() * knightLines.length)];
-      playKnightSound();
-    }
+  if (isBirthdayOpen === 1) {
+    const birthdayLines = [
+      "生日快乐！欣雨大人！",
+      "祝学姐年年岁岁，永不掉档！",
+      "今天是你的专属节日！",
+      "接下来的每一天都要开心！",
+      "生日快乐！🎉"
+    ];
+    line = birthdayLines[Math.floor(Math.random() * birthdayLines.length)];
+    if (who === 'hornet') { playHornetSound(true); } else { playKnightSound(); }
     b.style.opacity = 0;
     setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
     if (el && !el.classList.contains('jump')) {
       el.classList.add('jump');
       setTimeout(() => el.classList.remove('jump'), 520);
     }
+    return; 
   }
 
-  function playHornetSound(useOld) {
-    if (useOld) {
-      let idx = Math.floor(Math.random() * hornetSoundsOld.length);
-      if (idx === lastOldSound) idx = (idx + 1) % hornetSoundsOld.length;
-      lastOldSound = idx;
-      const a = new Audio(hornetSoundsOld[idx]);
-      a.volume = 0.8; a.play().catch(() => {});
-    } else {
-      let idx = Math.floor(Math.random() * hornetSoundsNew.length);
-      if (idx === lastNewSound) idx = (idx + 1) % hornetSoundsNew.length;
-      lastNewSound = idx;
-      const a = new Audio(hornetSoundsNew[idx]);
-      a.volume = 0.8; a.play().catch(() => {});
-    }
+  if (who === 'hornet') {
+    const useOld = Math.random() < 0.5;
+    const pool = useOld ? hornetLinesOld : hornetLinesNew;
+    line = pool[Math.floor(Math.random() * pool.length)];
+    playHornetSound(useOld);
+  } else {
+    line = knightLines[Math.floor(Math.random() * knightLines.length)];
+    playKnightSound();
   }
+  b.style.opacity = 0;
+  setTimeout(() => { b.textContent = line; b.style.opacity = 1; }, 180);
+  if (el && !el.classList.contains('jump')) {
+    el.classList.add('jump');
+    setTimeout(() => el.classList.remove('jump'), 520);
+  }
+}
 
-  function playKnightSound() {
-    const a = new Audio('./assets/knight_sound.mp3');
+function playHornetSound(useOld) {
+  if (useOld) {
+    let idx = Math.floor(Math.random() * hornetSoundsOld.length);
+    if (idx === lastOldSound) idx = (idx + 1) % hornetSoundsOld.length;
+    lastOldSound = idx;
+    const a = new Audio(hornetSoundsOld[idx]);
+    a.volume = 0.8; a.play().catch(() => {});
+  } else {
+    let idx = Math.floor(Math.random() * hornetSoundsNew.length);
+    if (idx === lastNewSound) idx = (idx + 1) % hornetSoundsNew.length;
+    lastNewSound = idx;
+    const a = new Audio(hornetSoundsNew[idx]);
     a.volume = 0.8; a.play().catch(() => {});
   }
+}
 
-  function loadTrack(i) { bgm.src = playlist[i]; }
-  function toggleMusic() {
-    if (!bgm.src) loadTrack(currentTrack);
-    if (playing) { bgm.pause(); btn.classList.remove('playing'); btn.textContent = '♪'; } 
-    else { bgm.volume = 0.5; bgm.play().catch(() => {}); btn.classList.add('playing'); btn.textContent = '❚❚'; }
-    playing = !playing;
-  }
-  function nextTrack() {
-    currentTrack = (currentTrack + 1) % playlist.length;
-    loadTrack(currentTrack);
-    if (playing) { bgm.play().catch(() => {}); }
-    else { bgm.play().then(() => { playing = true; btn.classList.add('playing'); btn.textContent = '❚❚'; }).catch(() => {}); }
-  }
+function playKnightSound() {
+  const a = new Audio('./assets/knight_sound.mp3');
+  a.volume = 0.8; a.play().catch(() => {});
+}
 
-  function formatDuration(ms) {
-    const totalMin = Math.floor(ms / 60000);
-    const days = Math.floor(totalMin / 1440);
-    const hours = Math.floor((totalMin % 1440) / 60);
-    const mins = totalMin % 60;
-    let parts = [];
-    if (days > 0) parts.push(days + "天");
-    if (hours > 0) parts.push(hours + "小时");
-    if (mins > 0) parts.push(mins + "分钟");
-    if (parts.length === 0) parts.push("刚刚");
-    return parts.join("");
-  }
+function loadTrack(i) { bgm.src = playlist[i]; }
+function toggleMusic() {
+  if (!bgm.src) loadTrack(currentTrack);
+  if (playing) { bgm.pause(); btn.classList.remove('playing'); btn.textContent = '♪'; } 
+  else { bgm.volume = 0.5; bgm.play().catch(() => {}); btn.classList.add('playing'); btn.textContent = '❚❚'; }
+  playing = !playing;
+}
+function nextTrack() {
+  currentTrack = (currentTrack + 1) % playlist.length;
+  loadTrack(currentTrack);
+  if (playing) { bgm.play().catch(() => {}); }
+  else { bgm.play().then(() => { playing = true; btn.classList.add('playing'); btn.textContent = '❚❚'; }).catch(() => {}); }
+}
 
-  async function recordEnter() {
-    if (!db) return;
-    try { await db.from("visits").insert({ visitor: VISITOR, entered_at: new Date().toISOString() }); } catch (e) {}
-  }
-  async function recordLeave() {
-    if (!db) return;
-    try {
-      const { data } = await db.from("visits").select("*").eq("visitor", VISITOR).is("left_at", null).order("entered_at", { ascending: false }).limit(1);
-      if (data && data[0]) { await db.from("visits").update({ left_at: new Date().toISOString() }).eq("id", data[0].id); }
-    } catch (e) {}
-  }
-  async function showLastGap() {
-    if (!db) return;
-    try {
-      const { data } = await db.from("visits").select("*").eq("visitor", VISITOR).not("left_at", "is", null).order("left_at", { ascending: false }).limit(1);
-      if (data && data[0]) {
-        const left = new Date(data[0].left_at).getTime();
-        const diff = Date.now() - left;
-        if (diff > 60 * 1000) {
-          const text = formatDuration(diff);
-          const lines = [
-            `竟然坚持了 ${text}，赶快休息一下吧。`,
-            `距离上次来驿站，已经过了 ${text}。累坏了吧。`,
-            `你撑了 ${text} 才回来。辛苦了，欣雨大人。`,
-            `上次离开到现在，${text} 过去了。歇一歇吧。`,
-            `你已经连续忙了 ${text}。小骑士说，该放下了。`
-          ];
-          const idx = new Date().getDate() % lines.length;
-          setTimeout(() => { document.getElementById("bubble").textContent = lines[idx]; }, 600);
-        }
+function formatDuration(ms) {
+  const totalMin = Math.floor(ms / 60000);
+  const days = Math.floor(totalMin / 1440);
+  const hours = Math.floor((totalMin % 1440) / 60);
+  const mins = totalMin % 60;
+  let parts = [];
+  if (days > 0) parts.push(days + "天");
+  if (hours > 0) parts.push(hours + "小时");
+  if (mins > 0) parts.push(mins + "分钟");
+  if (parts.length === 0) parts.push("刚刚");
+  return parts.join("");
+}
+
+async function recordEnter() {
+  if (!db) return;
+  try { await db.from("visits").insert({ visitor: VISITOR, entered_at: new Date().toISOString() }); } catch (e) {}
+}
+async function recordLeave() {
+  if (!db) return;
+  try {
+    const { data } = await db.from("visits").select("*").eq("visitor", VISITOR).is("left_at", null).order("entered_at", { ascending: false }).limit(1);
+    if (data && data[0]) { await db.from("visits").update({ left_at: new Date().toISOString() }).eq("id", data[0].id); }
+  } catch (e) {}
+}
+async function showLastGap() {
+  if (!db) return;
+  try {
+    const { data } = await db.from("visits").select("*").eq("visitor", VISITOR).not("left_at", "is", null).order("left_at", { ascending: false }).limit(1);
+    if (data && data[0]) {
+      const left = new Date(data[0].left_at).getTime();
+      const diff = Date.now() - left;
+      if (diff > 60 * 1000) {
+        const text = formatDuration(diff);
+        const lines = [
+          `竟然坚持了 ${text}，赶快休息一下吧。`,
+          `距离上次来驿站，已经过了 ${text}。累坏了吧。`,
+          `你撑了 ${text} 才回来。辛苦了，欣雨大人。`,
+          `上次离开到现在，${text} 过去了。歇一歇吧。`,
+          `你已经连续忙了 ${text}。小骑士说，该放下了。`
+        ];
+        const idx = new Date().getDate() % lines.length;
+        setTimeout(() => { document.getElementById("bubble").textContent = lines[idx]; }, 600);
       }
-    } catch (e) {}
-  }
-  function initSupabase() {
+    }
+  } catch (e) {}
+}
+
+function initSupabase() {
   try {
     if (!SUPABASE_URL.startsWith("http")) return;
     if (!window.supabase) {
-      console.warn("Supabase SDK 还没加载好，稍后重试...");
-      setTimeout(initSupabase, 1000); // 👈 如果手机网慢没加载出来，1秒后重试
+      setTimeout(initSupabase, 1000); 
       return;
     }
     db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     console.log("驿站成功连上电啦！");
   } catch (e) { 
-    console.error("连接失败:", e);
     db = null; 
   }
 }
-  }
 
-  window.addEventListener("load", () => {
+window.addEventListener("load", () => {
   initSupabase();
   showLastGap();
   recordEnter();
@@ -678,110 +192,109 @@
     document.getElementById('replayModal').classList.add('active'); 
   }
 
-  // 👇 新增：每次刷新或进入页面，检查缓存里的次数，如果 >= 3，就把纪念盒亮出来！
-  if (replayCount >= 3) {
+  // 自动检查纪念盒
+  let currentReplayCount = parseInt(localStorage.getItem('birthdayReplayCount')) || 0;
+  if (currentReplayCount >= 3) {
     document.getElementById('memoryBoxTrigger').style.display = 'block';
   }
 });
-  window.addEventListener("beforeunload", recordLeave);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") recordLeave();
-    else recordEnter();
+window.addEventListener("beforeunload", recordLeave);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") recordLeave();
+  else recordEnter();
+});
+
+document.addEventListener('mousemove', (e) => {
+  const imgs = document.querySelectorAll('.char img');
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  const dx = (e.clientX - cx) / cx;
+  const dy = (e.clientY - cy) / cy;
+  imgs.forEach(img => {
+    img.style.transform = `translate(${dx * 6}px, ${dy * 4}px) rotate(${dx * 2}deg)`;
   });
+});
 
-  document.addEventListener('mousemove', (e) => {
-    const imgs = document.querySelectorAll('.char img');
-    const cx = window.innerWidth / 2;
-    const cy = window.innerHeight / 2;
-    const dx = (e.clientX - cx) / cx;
-    const dy = (e.clientY - cy) / cy;
-    imgs.forEach(img => {
-      img.style.transform = `translate(${dx * 6}px, ${dy * 4}px) rotate(${dx * 2}deg)`;
-    });
-  });
+document.querySelectorAll('.char').forEach(el => {
+  let timer = null;
+  let mode = "idle";
+  let musicAudio = null;
+  let longPress = false;
 
-  document.querySelectorAll('.char').forEach(el => {
-    let timer = null;
-    let mode = "idle";
-    let musicAudio = null;
-    let longPress = false;
+  const setMode = (m) => {
+    if (mode === m) return;
+    mode = m;
+    const img = el.querySelector('img');
+    if (musicAudio) { musicAudio.pause(); musicAudio.currentTime = 0; musicAudio = null; }
+    if (m === "fight" && el.dataset.fight) {
+      img.src = el.dataset.fight;
+      el.classList.add('fighting'); el.classList.remove('music');
+      const a = new Audio(el.classList.contains('hornet') ? './assets/hornet_fight.mp3' : './assets/knight_fight.mp3');
+      a.volume = 0.8; a.play().catch(() => {});
+    } else if (m === "music" && el.dataset.music) {
+      img.src = el.dataset.music;
+      el.classList.add('music'); el.classList.remove('fighting');
+      musicAudio = new Audio('./assets/hornet_music.mp3');
+      musicAudio.loop = true; musicAudio.volume = 0.7; musicAudio.play().catch(() => {});
+    } else {
+      img.src = el.dataset.normal;
+      el.classList.remove('fighting'); el.classList.remove('music');
+    }
+  };
 
-    const setMode = (m) => {
-      if (mode === m) return;
-      mode = m;
-      const img = el.querySelector('img');
-      if (musicAudio) { musicAudio.pause(); musicAudio.currentTime = 0; musicAudio = null; }
-      if (m === "fight" && el.dataset.fight) {
-        img.src = el.dataset.fight;
-        el.classList.add('fighting'); el.classList.remove('music');
-        const a = new Audio(el.classList.contains('hornet') ? './assets/hornet_fight.mp3' : './assets/knight_fight.mp3');
-        a.volume = 0.8; a.play().catch(() => {});
-      } else if (m === "music" && el.dataset.music) {
-        img.src = el.dataset.music;
-        el.classList.add('music'); el.classList.remove('fighting');
-        musicAudio = new Audio('./assets/hornet_music.mp3');
-        musicAudio.loop = true; musicAudio.volume = 0.7; musicAudio.play().catch(() => {});
-      } else {
-        img.src = el.dataset.normal;
-        el.classList.remove('fighting'); el.classList.remove('music');
+  const start = () => {
+    longPress = false;
+    timer = setTimeout(() => {
+      longPress = true;
+      
+      if (isBirthdayOpen === 1 && !el.classList.contains('hornet')) {
+        const b = document.getElementById('bubble');
+        b.style.opacity = 0;
+        setTimeout(() => { b.textContent = "被ban了，生日期间禁止搞破坏。"; b.style.opacity = 1; }, 180);
+        return; 
       }
-    };
 
-    const start = () => {
-      longPress = false;
-      timer = setTimeout(() => {
-        longPress = true;
-        
-        // 彩蛋二
-        if (isBirthdayOpen === 1 && !el.classList.contains('hornet')) {
-          const b = document.getElementById('bubble');
-          b.style.opacity = 0;
-          setTimeout(() => { b.textContent = "被ban了，生日期间禁止搞破坏。"; b.style.opacity = 1; }, 180);
-          return; 
-        }
+      if (el.classList.contains('hornet')) { setMode("music"); } 
+      else { setMode("fight"); }
+    }, 400);
+  };
 
-        if (el.classList.contains('hornet')) { setMode("music"); } 
-        else { setMode("fight"); }
-      }, 400);
-    };
+  const end = () => {
+    clearTimeout(timer);
+    if (mode !== "idle") setMode("idle");
+  };
 
-    const end = () => {
-      clearTimeout(timer);
-      if (mode !== "idle") setMode("idle");
-    };
+  const click = () => {
+    if (longPress) { longPress = false; return; }
+    const who = el.classList.contains('hornet') ? 'hornet' : 'knight';
+    talk(who, el);
+  };
 
-    const click = () => {
-      if (longPress) { longPress = false; return; }
-      const who = el.classList.contains('hornet') ? 'hornet' : 'knight';
-      talk(who, el);
-    };
+  el.addEventListener('mousedown', start);
+  el.addEventListener('touchstart', start, {passive: true});
+  el.addEventListener('mouseup', end);
+  el.addEventListener('mouseleave', end);
+  el.addEventListener('touchend', end);
+  el.addEventListener('touchcancel', end);
+  el.addEventListener('click', click);
+});
 
-    el.addEventListener('mousedown', start);
-    el.addEventListener('touchstart', start, {passive: true});
-    el.addEventListener('mouseup', end);
-    el.addEventListener('mouseleave', end);
-    el.addEventListener('touchend', end);
-    el.addEventListener('touchcancel', end);
-    el.addEventListener('click', click);
-  });
+for (let i = 0; i < 26; i++) {
+  const f = document.createElement('div');
+  f.className = 'firefly';
+  f.style.left = Math.random() * 100 + 'vw';
+  f.style.bottom = '-10px';
+  f.style.animationDuration = (8 + Math.random() * 10) + 's';
+  f.style.animationDelay = Math.random() * 10 + 's';
+  document.body.appendChild(f);
+}
 
-  for (let i = 0; i < 26; i++) {
-    const f = document.createElement('div');
-    f.className = 'firefly';
-    f.style.left = Math.random() * 100 + 'vw';
-    f.style.bottom = '-10px';
-    f.style.animationDuration = (8 + Math.random() * 10) + 's';
-    f.style.animationDelay = Math.random() * 10 + 's';
-    document.body.appendChild(f);
-  }
-
-  async function sendLetter() {
+async function sendLetter() {
   const input = document.getElementById('letterInput');
   const msg = document.getElementById('letterMsg');
   const text = input.value.trim();
   if (!text) { msg.textContent = '咋是空的？是想送个飞吻嘛？（开玩笑辣）'; return; }
   
-  // 如果 db 还没准备好，强行再初始化一次
   if (!db) { 
     initSupabase();
     if (!db) {
@@ -791,48 +304,38 @@
   }
 
   msg.textContent = '正在寄信...';
-  
   try {
-    // 👈 加上 .then() 和 .catch() 确保请求在手机端能跑通
     const { data, error } = await db.from("letters").insert([{ content: text }]);
-    
     if (error) throw error;
-
     input.value = '';
     msg.textContent = 'wow很有用的信！已经放好啦！下次再来哦哟！';
   } catch (e) { 
-    console.error("寄信失败:", e);
     msg.textContent = '对不起，信没保护好，再来一次吧'; 
   }
 }
 
-  // ================= 生日 DLC 逻辑 =================
-  let birthdayStage = 0; 
-  let birthdayTimer = null;
-  // 从本地缓存读取记录，如果没有记录就是0
-  let replayCount = parseInt(localStorage.getItem('birthdayReplayCount')) || 0;
+// ================= 生日 DLC 逻辑 =================
+let birthdayStage = 0; 
+let birthdayTimer = null;
 
-  function replayBirthday(isYes) {
+function replayBirthday(isYes) {
   const modal = document.getElementById('replayModal');
-  modal.classList.remove('active');
+  if(modal) modal.classList.remove('active');
   
   if (isYes) {
+    let replayCount = parseInt(localStorage.getItem('birthdayReplayCount')) || 0;
     replayCount++;
     localStorage.setItem('birthdayReplayCount', replayCount);
-    birthdayStage = 0;
     
-    // 重置礼物盒和蛋糕
+    birthdayStage = 0;
     document.getElementById('giftBox').classList.remove('opened');
     document.getElementById('cakeBox').classList.remove('show');
-    
-    // 重置蛋糕的切图状态 👇👇👇
     document.getElementById('wholeCake').style.display = 'block';
     document.getElementById('cutCake').style.display = 'none';
-    
-    // 重置火苗和黑幕
     document.getElementById('flameGif').style.display = 'none';
     document.getElementById('darkOverlay').classList.remove('active');
     document.getElementById('birthdayScroll').classList.remove('active');
+    document.getElementById('blowHint').style.display = 'none';
     
     const hint = document.getElementById('birthdayHint');
     hint.style.display = 'block';
@@ -844,69 +347,80 @@
     document.getElementById('darkOverlay').classList.remove('active');
   }
 }
-  function handleBirthdayClick() {
-    const hint = document.getElementById('birthdayHint');
+
+function handleBirthdayClick() {
+  const hint = document.getElementById('birthdayHint');
+  
+  if (birthdayStage === 0) {
+    document.getElementById('giftBox').classList.add('opened');
+    setTimeout(() => { document.getElementById('cakeBox').classList.add('show'); }, 400);
+    setTimeout(() => { hint.textContent = '点蜡烛许愿'; birthdayStage = 1; }, 800);
+  } 
+  else if (birthdayStage === 1) {
+    document.getElementById('flameGif').style.display = 'block';
+    document.getElementById('darkOverlay').classList.add('active');
     
-    if (birthdayStage === 0) {
-      document.getElementById('giftBox').classList.add('opened');
-      setTimeout(() => { document.getElementById('cakeBox').classList.add('show'); }, 400);
-      setTimeout(() => { hint.textContent = '点蜡烛许愿'; birthdayStage = 1; }, 800);
-    } 
-    else if (birthdayStage === 1) {
-  const flame = document.getElementById('flameGif');
-  flame.style.display = 'block';
-  
-  document.getElementById('darkOverlay').classList.add('active');
-  
-  const blow = document.getElementById('blowHint');
-  blow.style.display = 'block';
-  blow.classList.add('blow-hint-active');
-  
-  hint.style.display = 'none'; 
-  birthdayStage = 2;
-  
-  birthdayTimer = setTimeout(() => {
-    if (birthdayStage === 2) { hint.textContent = '开始吹蜡烛吧'; hint.style.display = 'block'; }
-  }, 60000);
-}
-    else if (birthdayStage === 2) {
-  clearTimeout(birthdayTimer);
-  
-  const flame = document.getElementById('flameGif');
-  flame.style.display = 'none'; 
-  
-  document.getElementById('darkOverlay').classList.remove('active');
-  
-  const blow = document.getElementById('blowHint');
-  blow.style.display = 'none';
-  blow.classList.remove('blow-hint-active');
-  
-  const b = document.getElementById('bubble');
-  b.style.opacity = 1; 
-  b.textContent = "生日快乐！！！🎉"; 
-  
-  hint.textContent = '开始切蛋糕吧';
-  hint.style.display = 'block';
-  birthdayStage = 3;
-}
-    // 阶段 3：切蛋糕
-else if (birthdayStage === 3) {
-  hint.style.display = 'none';
-  
-  // 把完整的蛋糕藏起来，把切好的蛋糕亮出来
-  document.getElementById('wholeCake').style.display = 'none';
-  document.getElementById('cutCake').style.display = 'block';
-  
-  document.getElementById('birthdayScroll').classList.add('active');
-  birthdayStage = 4;
-}
+    const blow = document.getElementById('blowHint');
+    blow.style.display = 'block';
+    blow.classList.add('blow-hint-active');
+    
+    hint.style.display = 'none'; 
+    birthdayStage = 2;
+    
+    birthdayTimer = setTimeout(() => {
+      if (birthdayStage === 2) { hint.textContent = '开始吹蜡烛吧'; hint.style.display = 'block'; }
+    }, 60000);
   }
- // ====== 忆庭纪念盒逻辑 ======
+  else if (birthdayStage === 2) {
+    clearTimeout(birthdayTimer);
+    document.getElementById('flameGif').style.display = 'none'; 
+    document.getElementById('darkOverlay').classList.remove('active');
+    
+    const blow = document.getElementById('blowHint');
+    blow.style.display = 'none';
+    blow.classList.remove('blow-hint-active');
+    
+    const b = document.getElementById('bubble');
+    b.style.opacity = 1; 
+    b.textContent = "生日快乐！！！🎉"; 
+    
+    hint.textContent = '开始切蛋糕吧';
+    hint.style.display = 'block';
+    birthdayStage = 3;
+  }
+  else if (birthdayStage === 3) {
+    hint.style.display = 'none';
+    document.getElementById('wholeCake').style.display = 'none';
+    document.getElementById('cutCake').style.display = 'block';
+    document.getElementById('birthdayScroll').classList.add('active');
+    birthdayStage = 4;
+  }
+}
+
+function closeBirthdayDLC() {
+  document.getElementById('birthday-dlc').classList.remove('active');
+  document.getElementById('darkOverlay').classList.remove('active');
+  document.getElementById('flameGif').style.display = 'none';
+  
+  birthdayStage = 0;
+  document.getElementById('giftBox').classList.remove('opened');
+  document.getElementById('cakeBox').classList.remove('show');
+  document.getElementById('birthdayScroll').classList.remove('active');
+  document.getElementById('wholeCake').style.display = 'block';
+  document.getElementById('cutCake').style.display = 'none';
+  document.getElementById('blowHint').style.display = 'none';
+  
+  const hint = document.getElementById('birthdayHint');
+  hint.style.display = 'block';
+  hint.textContent = '点击拆开';
+}
+
+// ====== 忆庭纪念盒逻辑 ======
 let selectedMemoryNode = '';
 
 function openMemoryList() {
   document.getElementById('memoryModal').style.display = 'flex';
-  selectNode('2027.01.05'); // 默认选中
+  selectNode('2027.01.05'); 
 }
 
 function selectNode(nodeName) {
@@ -917,35 +431,7 @@ function selectNode(nodeName) {
 
 function startMemoryReplay() {
   if (!selectedMemoryNode) return;
-  
-  // 关掉弹窗
   document.getElementById('memoryModal').style.display = 'none';
-  
-  // 强制亮出 DLC 界面
   document.getElementById('birthday-dlc').classList.add('active');
-  
-  // 强行把重置和拆礼物流程走一遍
   replayBirthday(true); 
 }
- // 退出生日DLC，恢复正常驿站
-function closeBirthdayDLC() {
-  document.getElementById('birthday-dlc').classList.remove('active');
-  document.getElementById('darkOverlay').classList.remove('active');
-  document.getElementById('flameGif').style.display = 'none';
-  
-  birthdayStage = 0;
-  document.getElementById('giftBox').classList.remove('opened');
-  document.getElementById('cakeBox').classList.remove('show');
-  document.getElementById('birthdayScroll').classList.remove('active');
-  
-  // 退出时，把蛋糕切图也重置 👇👇👇
-  document.getElementById('wholeCake').style.display = 'block';
-  document.getElementById('cutCake').style.display = 'none';
-  
-  const hint = document.getElementById('birthdayHint');
-  hint.style.display = 'block';
-  hint.textContent = '点击拆开';
-}
-</script>
-</body>
-</html>
